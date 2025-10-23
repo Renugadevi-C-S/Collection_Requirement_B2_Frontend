@@ -1,1 +1,11 @@
-<p>lc-dashboard works!</p>
+<div class="lc-dashboard-container">
+    <nav class="nav-bar">
+        <a routerLink="/lc-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
+        <a routerLink="/lc-dashboard/submit-request" routerLinkActive="active">Submit Request</a>
+        <a routerLink="/lc-dashboard/view-requests" routerLinkActive="active">View Requests</a>
+    </nav>
+    <div class="dashboard-content">
+        <h2>Welcome to the Learning Champion Dashboard </h2>
+        <router-outlet></router-outlet>
+    </div>
+</div>
