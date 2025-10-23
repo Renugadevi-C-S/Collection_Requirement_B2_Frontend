@@ -10,8 +10,9 @@ export interface LoginDetails {
 
 export interface LoginResponse {
   message: string;
-  csdId: string;
+  cdsId: string;
   role: string;
+  userName: string;
 }
 
 @Injectable({
