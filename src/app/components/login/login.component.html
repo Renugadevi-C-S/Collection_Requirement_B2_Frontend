@@ -1,0 +1,57 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- You'll need to place a ford-logo.svg in your src/assets/ folder or remove this img tag -->
+    <img src="assets/ford-logo.svg" alt="Ford Logo" class="ford-logo" />
+    <h2>Ford Application Login</h2>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="userId">CDS ID:</label>
+        <input
+          id="userId"
+          type="text"
+          formControlName="userId"
+          placeholder="Enter your User CDS-ID"
+          required
+        />
+        <!-- Display error message if userId is invalid and touched -->
+        <div
+          *ngIf="
+            loginForm.get('userId')?.invalid && loginForm.get('userId')?.touched
+          "
+          class="error-message"
+        >
+          CDS ID is required.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Enter your Password"
+          required
+        />
+        <!-- Display error message if password is invalid and touched -->
+        <div
+          *ngIf="
+            loginForm.get('password')?.invalid &&
+            loginForm.get('password')?.touched
+          "
+          class="error-message"
+        >
+          Password is required.
+        </div>
+      </div>
+
+      <!-- Submit button, disabled if the form is invalid -->
+      <button type="submit" [disabled]="loginForm.invalid">Login</button>
+    </form>
+
+    <p class="note">
+      Note: Password verification will be handled by your UserService later.
+    </p>
+  </div>
+</div>
