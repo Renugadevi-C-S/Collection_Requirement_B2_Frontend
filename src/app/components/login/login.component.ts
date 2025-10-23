@@ -53,6 +53,7 @@ export class LoginComponent implements OnInit {
             } else {
               this.errorMessage = 'An unexpected error occurred during login. Please try again.';
             }
+            alert(this.errorMessage);
             return of(null); 
           })
         )
