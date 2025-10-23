@@ -1,1 +1,8 @@
-<p>header works!</p>
+<header class="app-header">
+  <div class="header-title">
+    <span>Ford ET L&D</span>
+  </div>
+  <div *ngIf="isUserLoggedIn" class="header-actions">
+    <button (click)="logout()" class="logout-button">Log-Out</button>
+  </div>
+</header>
