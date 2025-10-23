@@ -46,7 +46,7 @@ export class LoginComponent implements OnInit {
           catchError(err => {
             console.error('Login error:', err);
             // Handle different types of errors (e.g., 401 Unauthorized, 400 Bad Request)
-            if (err.status === 401) {
+            if (err.statusCode === 401) {
               this.errorMessage = 'Invalid CDS ID or password.';
             } else if (err.error && err.error.message) {
               this.errorMessage = err.error.message;
