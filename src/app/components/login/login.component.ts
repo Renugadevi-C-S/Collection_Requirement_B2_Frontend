@@ -20,6 +20,7 @@ export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   fetchUser!: Observable<user>; 
   errorMessage: string = ''; 
+  logInUserDetails!: LoginResponse;
 
   constructor(
     private fb: FormBuilder,
@@ -45,20 +46,13 @@ export class LoginComponent implements OnInit {
         .pipe(
           catchError(err => {
             console.error('Login error:', err);
-            // Handle different types of errors (e.g., 401 Unauthorized, 400 Bad Request)
-            if (err.statusCode === 401) {
-              this.errorMessage = 'Invalid CDS ID or password.';
-            } else if (err.error && err.error.message) {
-              this.errorMessage = err.error.message;
-            } else {
-              this.errorMessage = 'An unexpected error occurred during login. Please try again.';
-            }
-            alert(this.errorMessage);
+            alert(err.message);
             return of(null); 
           })
         )
         .subscribe((response: LoginResponse | null) => {
           if (response) {
+            this.logInUserDetails = response;
             console.log('Login successful:', response);
             switch (response.role) {
               case 'LC':
@@ -69,7 +63,8 @@ export class LoginComponent implements OnInit {
                 break;
               default:
                 this.errorMessage = 'You do not have permission to access any dashboard.';
-                alert('Access Denied: Your role does not permit dashboard access.');
+                console.warn('Unauthorized role:', response.role);
+                alert(this.errorMessage);
                 break;
             }
           } else {

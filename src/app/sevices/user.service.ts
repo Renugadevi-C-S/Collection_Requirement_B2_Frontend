@@ -28,3 +28,5 @@ export class UserService {
     return this.http.post<LoginResponse>(`${this.userURL}/login`, userLogin);
   }
 }
+export  type { LoginResponse };
+
