@@ -2,18 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { user } from '../model/user'; 
-
-export interface LoginDetails {
-  cdsId: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  message: string;
-  cdsId: string;
-  role: string;
-  userName: string;
-}
+import { LoginDetails } from '../model/logInDetails';
+import { LoginResponse } from '../model/logInResponse';
 
 @Injectable({
   providedIn: 'root'
