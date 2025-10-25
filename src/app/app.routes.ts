@@ -23,7 +23,7 @@ export const routes: Routes = [
     path: 'ldspoc-dashboard', 
     component: LdspocDashboardComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['L&DSPoC','ADMIN'] }
+    data: { roles: ['LNDSPOC','ADMIN'] }
   },
   { path: '**', redirectTo: '/login' }
 ];

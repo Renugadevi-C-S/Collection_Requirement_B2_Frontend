@@ -42,7 +42,7 @@ export class LoginComponent implements OnInit {
   private redirectToDashboard(role: string): void {
     if (role === 'LC') {
       this.router.navigate(['/lc-dashboard']);
-    } else if (role === 'L&DSPoC') {
+    } else if (role === 'LNDSPOC') {
       this.router.navigate(['/ldspoc-dashboard']);
     }
   }
