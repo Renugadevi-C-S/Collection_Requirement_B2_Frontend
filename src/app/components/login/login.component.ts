@@ -57,18 +57,15 @@ export class LoginComponent implements OnInit {
             this.userService.setLoggedInUser(response);
             
             console.log('Login successful:', response);
-            switch (response.role) {
-              case 'LC':
-                this.router.navigate(['/lc-dashboard']);
-                break;
-              case 'L&DSPoC':
-                this.router.navigate(['/ldspoc-dashboard']);
-                break;
-              default:
-                this.errorMessage = 'You do not have permission to access any dashboard.';
-                console.warn('Unauthorized role:', response.role);
-                alert(this.errorMessage);
-                break;
+            if(this.logInUserDetails.role === "LC"){
+              this.router.navigate(['/lc-dashboard']);
+            }
+            else if(this.logInUserDetails.role === "L&DSPOC"){
+              this.router.navigate(['/ldspoc-dashboard']);
+            }
+            else{
+              alert('Access Denied: Unauthorized Role');
+              this.router.navigate(['/login']);
             }
           } else {
             console.log('Login failed (response was null after error handling).');
