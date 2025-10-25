@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { user } from '../model/user'; 
 import { LoginDetails } from '../model/logInDetails';
 import { LoginResponse } from '../model/logInResponse';
@@ -11,6 +11,17 @@ import { LoginResponse } from '../model/logInResponse';
 export class UserService {
 
   userURL: string = 'http://localhost:8080/api/users'; 
+
+  private loggedInUserSubject: BehaviorSubject<LoginResponse | null> = new BehaviorSubject<LoginResponse | null>(null);
+  public loggedInUser: Observable<LoginResponse | null> = this.loggedInUserSubject.asObservable();
+
+  setLoggedInUser(loggedInUser: LoginResponse){
+    this.loggedInUserSubject.next(loggedInUser);
+  }
+
+  clearLoggedInUser(){
+    this.loggedInUserSubject.next(null);
+  }
  
 
   constructor(private http: HttpClient) { }
@@ -28,5 +39,5 @@ export class UserService {
     return this.http.post<LoginResponse>(`${this.userURL}/login`, userLogin);
   }
 }
-export  type { LoginResponse };
+
 

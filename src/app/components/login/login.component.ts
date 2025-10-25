@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserService, LoginResponse } from '../../sevices/user.service';
+import { UserService } from '../../sevices/user.service';
+import { LoginResponse } from '../../model/logInResponse';
 import { Observable, catchError, of } from 'rxjs'; 
 import { user } from '../../model/user';
 
@@ -53,6 +54,8 @@ export class LoginComponent implements OnInit {
         .subscribe((response: LoginResponse | null) => {
           if (response) {
             this.logInUserDetails = response;
+            this.userService.setLoggedInUser(response);
+            
             console.log('Login successful:', response);
             switch (response.role) {
               case 'LC':
