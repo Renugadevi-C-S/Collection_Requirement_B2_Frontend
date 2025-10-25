@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { UserService } from '../../sevices/user.service';
 import { LoginResponse } from '../../model/logInResponse';
 import { Observable, catchError, of } from 'rxjs'; 
-import { user } from '../../model/user';
 
 @Component({
   selector: 'app-login',
@@ -62,13 +61,17 @@ export class LoginComponent implements OnInit {
             return of(null); 
           })
         )
-        .subscribe((response: LoginResponse | null) => {
+        .subscribe((response: any | null) => {
           if (response) {
-            this.userService.setLoggedInUser(response); 
-            
-            console.log('Login successful:', response);
-
-            this.redirectToDashboard(response.role);
+             
+            console.log('Login response:', response);
+            if(response.statusCode != null){
+              alert(response.message);
+            }
+            else{
+              this.redirectToDashboard(response.role);
+              this.userService.setLoggedInUser(response);
+            }
           } else {
             console.log('Login failed (response was null after error handling).');
           }
