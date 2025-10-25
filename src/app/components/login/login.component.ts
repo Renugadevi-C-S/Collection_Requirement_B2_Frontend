@@ -18,10 +18,8 @@ import { user } from '../../model/user';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  loginForm!: FormGroup;
-  fetchUser!: Observable<user>; 
+  loginForm!: FormGroup; 
   errorMessage: string = ''; 
-  logInUserDetails!: LoginResponse;
 
   constructor(
     private fb: FormBuilder,
@@ -53,14 +51,14 @@ export class LoginComponent implements OnInit {
         )
         .subscribe((response: LoginResponse | null) => {
           if (response) {
-            this.logInUserDetails = response;
-            this.userService.setLoggedInUser(response);
+            this.userService.setLoggedInUser(response); 
             
             console.log('Login successful:', response);
-            if(this.logInUserDetails.role === "LC"){
+
+            if(response.role === "LC"){
               this.router.navigate(['/lc-dashboard']);
             }
-            else if(this.logInUserDetails.role === "L&DSPOC"){
+            else if(response.role === "L&DSPOC"){
               this.router.navigate(['/ldspoc-dashboard']);
             }
             else{

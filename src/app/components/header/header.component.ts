@@ -24,12 +24,11 @@ export class HeaderComponent implements OnInit {
     this.loggedInUser.subscribe(user => {
       this.currentUser = user;
     });
-  }       
-    
-  
+  }
+        
 
   logout(): void {
-    if(window.confirm(`${this.currentUser?.firstName}, want to LogOut?`)){
+    if(window.confirm(`Want to LogOut?`)){
       this.userService.clearLoggedInUser();
       this.router.navigate(['/login']);
     }
