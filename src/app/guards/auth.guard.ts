@@ -10,6 +10,7 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   } else {
     alert("You must be logged in to access this page.");
+    userService.clearLoggedInUser();
     router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
     return false;
   }
@@ -22,6 +23,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
   const currentUser = userService.getCurrentUser();
   
   if (!currentUser) {
+    userService.clearLoggedInUser();
     router.navigate(['/login']);
     return false;
   }
@@ -33,6 +35,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
       return true;
     } else {
       alert('Access Denied: You do not have permission to access this page.');
+      userService.clearLoggedInUser();
       router.navigate(['/login']);
       return false;
     }
