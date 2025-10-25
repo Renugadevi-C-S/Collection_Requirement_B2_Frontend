@@ -11,20 +11,48 @@ import { LoginResponse } from '../model/logInResponse';
 export class UserService {
 
   userURL: string = 'http://localhost:8080/api/users'; 
+  private readonly STORAGE_KEY = 'loggedInUser';
 
-  private loggedInUserSubject: BehaviorSubject<LoginResponse | null> = new BehaviorSubject<LoginResponse | null>(null);
-  public loggedInUser: Observable<LoginResponse | null> = this.loggedInUserSubject.asObservable();
+  private loggedInUserSubject: BehaviorSubject<LoginResponse | null>;
+  public loggedInUser: Observable<LoginResponse | null>;
 
-  setLoggedInUser(loggedInUser: LoginResponse){
+  constructor(private http: HttpClient) { 
+    const storedUser = this.getStoredUser();
+    this.loggedInUserSubject = new BehaviorSubject<LoginResponse | null>(storedUser);
+    this.loggedInUser = this.loggedInUserSubject.asObservable();
+  }
+
+  setLoggedInUser(loggedInUser: LoginResponse): void {
     this.loggedInUserSubject.next(loggedInUser);
+    sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(loggedInUser));
   }
 
-  clearLoggedInUser(){
+  clearLoggedInUser(): void {
     this.loggedInUserSubject.next(null);
+    sessionStorage.removeItem(this.STORAGE_KEY);
   }
- 
 
-  constructor(private http: HttpClient) { }
+  getCurrentUser(): LoginResponse | null {
+    return this.loggedInUserSubject.value;
+  }
+
+  isLoggedIn(): boolean {
+    return this.getCurrentUser() !== null;
+  }
+
+  private getStoredUser(): LoginResponse | null {
+    const storedData = sessionStorage.getItem(this.STORAGE_KEY);
+    if (storedData) {
+      try {
+        return JSON.parse(storedData) as LoginResponse;
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        sessionStorage.removeItem(this.STORAGE_KEY);
+        return null;
+      }
+    }
+    return null;
+  }
 
   getUserbyCdsId(cdsID: string): Observable<user> {
     return this.http.get<user>(`${this.userURL}/cdsId/${cdsID}`);

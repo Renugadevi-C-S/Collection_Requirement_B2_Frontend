@@ -28,10 +28,23 @@ export class LoginComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    const currentUser = this.userService.getCurrentUser();
+    if (currentUser) {
+      this.redirectToDashboard(currentUser.role);
+    }
+
     this.loginForm = this.fb.group({
       userId: ['', Validators.required], 
       password: ['', Validators.required]
     });
+  }
+
+  private redirectToDashboard(role: string): void {
+    if (role === 'LC') {
+      this.router.navigate(['/lc-dashboard']);
+    } else if (role === 'L&DSPOC') {
+      this.router.navigate(['/ldspoc-dashboard']);
+    }
   }
 
   onSubmit(): void {
@@ -55,16 +68,7 @@ export class LoginComponent implements OnInit {
             
             console.log('Login successful:', response);
 
-            if(response.role === "LC"){
-              this.router.navigate(['/lc-dashboard']);
-            }
-            else if(response.role === "L&DSPOC"){
-              this.router.navigate(['/ldspoc-dashboard']);
-            }
-            else{
-              alert('Access Denied: Unauthorized Role');
-              this.router.navigate(['/login']);
-            }
+            this.redirectToDashboard(response.role);
           } else {
             console.log('Login failed (response was null after error handling).');
           }

@@ -1,28 +1,40 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { UserService } from '../../sevices/user.service';
-import { Observable } from 'rxjs';
 import { LoginResponse } from '../../model/logInResponse';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-lc-dashboard',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './lc-dashboard.component.html',
   styleUrl: './lc-dashboard.component.css'
 })
-export class LcDashboardComponent implements OnInit {
+export class LcDashboardComponent implements OnInit, OnDestroy {
 
-  loggedInUser: Observable<LoginResponse | null>;
   currentUser: LoginResponse | null = null;
-  constructor(private userService: UserService){
-    this.loggedInUser = userService.loggedInUser;
-  }
+  private userSubscription?: Subscription;
+
+  constructor(private userService: UserService) {}
+
   ngOnInit(): void {
-    this.loggedInUser.subscribe( user => {
+    this.userSubscription = this.userService.loggedInUser.subscribe(user => {
       this.currentUser = user;
-    })
-
+    });
   }
 
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
+  }
+
+  getUserDisplayName(): string {
+    if (this.currentUser) {
+      return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
+    }
+    return 'User';
+  }
 }

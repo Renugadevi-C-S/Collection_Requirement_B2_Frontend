@@ -5,7 +5,8 @@
         <a routerLink="/lc-dashboard/view-requests" routerLinkActive="active">View Requests</a>
     </nav>
     <div class="dashboard-content">
-        <h2>Welcome! Learning Champion </h2>
+        <h2>Welcome, {{ getUserDisplayName() }}!</h2>
+        <p>Learning Champion Dashboard</p>
         <router-outlet></router-outlet>
     </div>
 </div>
