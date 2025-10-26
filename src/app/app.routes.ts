@@ -15,10 +15,10 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['LC','ADMIN'] },
     children: [
-      { path: 'submit-request', component: LcRequestFormComponent },
-      { path: 'view-requests', component: LcRequestsListComponent }
-    ]
-  },
+          { path: 'submit-request', component: LcRequestFormComponent },
+          { path: 'view-requests', component: LcRequestsListComponent }
+        ]
+   },
   { 
     path: 'ldspoc-dashboard', 
     component: LdspocDashboardComponent,
