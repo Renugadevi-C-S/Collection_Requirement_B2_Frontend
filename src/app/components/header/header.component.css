@@ -17,6 +17,19 @@
   letter-spacing: 1px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-info {
+  font-size: 0.95em;
+  font-weight: 500;
+  color: #ffffff;
+  opacity: 0.95;
+}
+
 .logout-button {
   background-color: transparent;
   border: 1px solid #ffffff;

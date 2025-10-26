@@ -2,7 +2,8 @@
   <div class="header-title">
     <span>Ford ET L&D</span>
   </div>
-  <div *ngIf="isUserLoggedIn" class="header-actions">
-    <button (click)="logout()" class="logout-button">Log-Out</button>
+  <div *ngIf="currentUser" class="header-actions">
+    <span class="user-info">Welcome, {{ getUserDisplayName() }} ({{ currentUser.role }})</span>
+    <button (click)="logout()" class="logout-button">Log Out</button>
   </div>
 </header>

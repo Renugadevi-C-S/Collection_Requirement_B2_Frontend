@@ -8,5 +8,5 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   styleUrl: './ldspoc-dashboard.component.css'
 })
 export class LdspocDashboardComponent {
-
+  
 }
