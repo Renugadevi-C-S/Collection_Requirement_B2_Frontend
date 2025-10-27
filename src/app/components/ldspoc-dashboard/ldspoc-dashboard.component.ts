@@ -155,8 +155,9 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
   }
 
   onEditRequest(requestId: number): void {
-    this.router.navigate(['ldspoc-dashboard/edit-requests', requestId]);
+    this.router.navigate(['ldspoc-dashboard/edit-request', requestId]);
   }
+
 
     
 }

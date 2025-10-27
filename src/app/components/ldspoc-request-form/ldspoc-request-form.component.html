@@ -1,22 +1,33 @@
 <div class="request-form-container">
-  <h2>Submit Training Request</h2>
+  <h2>{{ isEditMode ? 'Edit Training Request' : 'Submit Training Request' }}</h2>
+  <p *ngIf="isEditMode && requestId" class="request-id-info">Request ID: #{{ requestId }}</p>
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading request data...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-alert">
+    <span>⚠️ {{ errorMessage }}</span>
+  </div>
   
   <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" class="request-form">
     
-    <!-- Requestor ID (Read-only) -->
     <div class="form-group">
       <label for="requestorId">Requestor CDS ID</label>
       <input 
         type="text" 
         id="requestorId" 
-        [value]="currentUser?.cdsId || ''" 
+        [value]="getDisplayRequestorId()" 
         readonly
         class="form-control readonly-field"
       />
-      <small class="form-text">This field is auto-filled from your login</small>
+      <small class="form-text">
+        {{ isEditMode ? 'Original requestor (cannot be changed)' : 'This field is auto-filled and cannot be edited' }}
+      </small>
     </div>
 
-    <!-- Justification -->
+
     <div class="form-group">
       <label for="justification">Justification <span class="required">*</span></label>
       <textarea 
@@ -32,7 +43,6 @@
       </small>
     </div>
 
-    <!-- TAN Number -->
     <div class="form-group">
       <label for="tanNo">TAN Number <span class="required">*</span></label>
       <input 
@@ -48,7 +58,6 @@
       </small>
     </div>
 
-    <!-- Number of Participants -->
     <div class="form-group">
       <label for="noOfParticipants">Number of Participants <span class="required">*</span></label>
       <input 
@@ -65,7 +74,6 @@
       </small>
     </div>
 
-    <!-- Department -->
     <div class="form-group">
       <label for="department">Department <span class="required">*</span></label>
       <select 
@@ -92,7 +100,6 @@
       </small>
     </div>
 
-    <!-- Curriculum File Upload -->
     <div class="form-group">
       <label for="curriculum">Curriculum Document (PDF/Excel)</label>
       <div class="file-input-wrapper">
@@ -111,24 +118,30 @@
       <small class="form-text">Optional: Upload PDF or Excel file</small>
     </div>
 
-    <!-- Form Actions -->
     <div class="form-actions">
       <button 
         type="submit" 
         class="btn btn-primary"
-        [disabled]="isSubmitting"
+        [disabled]="isSubmitting || isLoading"
       >
-        {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
+        {{ isSubmitting ? 'Submitting...' : (isEditMode ? 'Update Request' : 'Submit Request') }}
       </button>
       <button 
         type="button" 
         class="btn btn-secondary"
         (click)="onReset()"
-        [disabled]="isSubmitting"
+        [disabled]="isSubmitting || isLoading"
       >
-        Reset
+        {{ isEditMode ? 'Reset to Original' : 'Reset' }}
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-secondary"
+        (click)="onCancel()"
+        [disabled]="isSubmitting || isLoading"
+      >
+        Cancel
       </button>
     </div>
   </form>
 </div>
-

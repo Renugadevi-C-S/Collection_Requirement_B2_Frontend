@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { requestDetails } from '../model/requestDetails';
 import { RequestSubmitResponse } from '../model/requestSubmitResponse';
 import { requestsViewDetails } from '../model/requestsViewDetails';
+import { requestUpdateDetails } from '../model/requestUpdateDetails';
 
 @Injectable({
   providedIn: 'root'
@@ -22,13 +23,15 @@ export class RequestService {
     return this.http.get<requestsViewDetails[]>(`${this.requestURL}/requestor/${requestorId}`);
   }
 
-  
+  getRequestById(requestId: number): Observable<requestsViewDetails> {
+    return this.http.get<requestsViewDetails>(`${this.requestURL}/${requestId}`);
+  }
+
+  updateRequest(requestId: number, updateData: requestUpdateDetails): Observable<any> {
+    return this.http.put(`${this.requestURL}/update/${requestId}`, updateData);
+  }
 
   getAllRequests(): Observable<requestsViewDetails[]> {
     return this.http.get<requestsViewDetails[]>(`${this.requestURL}/all`);
-  }
-  updateRequest(id: string, request: any): Observable<requestsViewDetails> {
-    console.log('Updating request:', id, request);
-    return this.http.put<requestsViewDetails>(`${this.requestURL}/requests/${id}`, request);
   }
 }

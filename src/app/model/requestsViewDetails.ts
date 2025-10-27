@@ -7,4 +7,6 @@ export interface requestsViewDetails {
     requestDate: Date | string;
     noOfParticipants: number;
     justification: string;
+    tanNo: string;
+    curriculum: string;
 }
