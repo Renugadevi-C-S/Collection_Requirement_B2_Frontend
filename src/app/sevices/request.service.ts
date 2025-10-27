@@ -22,7 +22,13 @@ export class RequestService {
     return this.http.get<requestsViewDetails[]>(`${this.requestURL}/requestor/${requestorId}`);
   }
 
+  
+
   getAllRequests(): Observable<requestsViewDetails[]> {
     return this.http.get<requestsViewDetails[]>(`${this.requestURL}/all`);
+  }
+  updateRequest(id: string, request: any): Observable<requestsViewDetails> {
+    console.log('Updating request:', id, request);
+    return this.http.put<requestsViewDetails>(`${this.requestURL}/requests/${id}`, request);
   }
 }

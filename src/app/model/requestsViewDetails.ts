@@ -6,4 +6,5 @@ export interface requestsViewDetails {
     requestDate: Date | string;
     noOfParticipants: number;
     justification: string;
+    requestedBy:String;
 }
