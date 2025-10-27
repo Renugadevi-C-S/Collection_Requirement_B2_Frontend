@@ -1,17 +1,130 @@
-<p>ldspoc-dashboard works!</p>
 <div class="ldspoc-dashboard-container">
     <nav class="nav-bar">
         <a routerLink="/ldspoc-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
-        <!-- <a routerLink="/ldspoc-dashboard/submit-request" routerLinkActive="active">Submit Request</a> -->
-        <!-- <a routerLink="/ldspoc-dashboard/view-requests" routerLinkActive="active">View Requests</a> -->
         <a routerLink="/ldspoc-dashboard/create-event" routerLinkActive="active">Create Event</a>
         <a routerLink="/ldspoc-dashboard/view-events" routerLinkActive="active">View Events</a>
     </nav>
     <div class="dashboard-content">
         <h2>Welcome, {{ getUserDisplayName() }}!</h2>
         <p>L&D Dashboard</p>
+        
+        <!-- Home Content - Learning Champions Requests -->
+        <div *ngIf="showHomeContent" class="home-content">
+            <div class="section-header">
+                <h3>Learning Champions Requests</h3>
+                <button class="new-request-btn" (click)="onNewRequest()">
+                    <span class="btn-icon">+</span> Create New Request
+                </button>
+            </div>
+
+            <div class="requests-list-container">
+                <div class="header-section">
+                    <h2>Training Requests</h2>
+                    <button (click)="refreshRequests()" class="btn-refresh" [disabled]="isLoading">
+                        <span *ngIf="!isLoading">🔄 Refresh</span>
+                        <span *ngIf="isLoading">Loading...</span>
+                    </button>
+                </div>
+
+                <!-- Filters Section -->
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <label for="search">Search:</label>
+                        <input 
+                            type="text"
+                            id="search"
+                            placeholder="Search by ID, event name, department..."
+                            (input)="onSearchChange($event)"
+                            class="search-input"
+                        />
+                    </div>
+                    <div class="filter-group">
+                        <label for="statusFilter">Status:</label>
+                        <select 
+                            id="statusFilter"
+                            (change)="onStatusFilterChange($event)"
+                            class="status-filter"
+                        >
+                            <option value="all">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="in progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div *ngIf="errorMessage" class="error-alert">
+                    <span>⚠️ {{ errorMessage }}</span>
+                    <button (click)="refreshRequests()" class="btn-retry">Retry</button>
+                </div>
+
+                <!-- Loading State -->
+                <div *ngIf="isLoading" class="loading-container">
+                    <div class="spinner"></div>
+                    <p>Loading requests...</p>
+                </div>
+
+                <!-- No Requests Message -->
+                <div *ngIf="!isLoading && filteredRequests.length === 0 && !errorMessage" class="no-requests">
+                    <p *ngIf="requests.length === 0">No requests found.</p>
+                    <p *ngIf="requests.length > 0">No requests match your filters.</p>
+                </div>
+
+                <!-- Requests Table -->
+                <div *ngIf="!isLoading && filteredRequests.length > 0" class="table-container">
+                    <table class="requests-table">
+                        <thead>
+                            <tr>
+                                <th>Request ID</th>
+                                <th>Event Name</th>
+                                <th>Department</th>
+                                <th>Participants</th>
+                                <th>Request Date</th>
+                                <th>Status</th>
+                                <th>Justification</th>
+                                <th>Requested By</th>
+                                <th>Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let request of filteredRequests" class="request-row">
+                                <td class="request-id">{{ request.requestId }}</td>
+                                <td class="event-name">{{ request.eventName || 'N/A' }}</td>
+                                <td>{{ request.department }}</td>
+                                <td class="text-center">{{ request.noOfParticipants }}</td>
+                                <td>{{ formatDate(request.requestDate) }}</td>
+                                <td>
+                                    <span [class]="'status-badge ' + getStatusClass(request.requestStatus)">
+                                        {{ request.requestStatus }}
+                                    </span>
+                                </td>
+                                <td class="justification">
+                                    <div class="justification-text" [title]="request.justification">
+                                        {{ request.justification }}
+                                    </div>
+                                </td>
+                                <td>{{ request.requestedBy }}</td>
+                                <td class="edit-actions">
+                                    <button class="edit-btn" (click)="onEditRequest(request.requestId)">
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Summary -->
+                <div *ngIf="!isLoading && requests.length > 0" class="summary-section">
+                    <p>Showing {{ filteredRequests.length }} of {{ requests.length }} request(s)</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Router Outlet for other pages -->
         <router-outlet></router-outlet>
     </div>
-    
-    
 </div>
