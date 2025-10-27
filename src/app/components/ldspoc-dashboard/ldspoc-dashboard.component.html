@@ -1,1 +1,17 @@
 <p>ldspoc-dashboard works!</p>
+<div class="ldspoc-dashboard-container">
+    <nav class="nav-bar">
+        <a routerLink="/ldspoc-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
+        <!-- <a routerLink="/ldspoc-dashboard/submit-request" routerLinkActive="active">Submit Request</a> -->
+        <!-- <a routerLink="/ldspoc-dashboard/view-requests" routerLinkActive="active">View Requests</a> -->
+        <a routerLink="/ldspoc-dashboard/create-event" routerLinkActive="active">Create Event</a>
+        <a routerLink="/ldspoc-dashboard/view-events" routerLinkActive="active">View Events</a>
+    </nav>
+    <div class="dashboard-content">
+        <h2>Welcome, {{ getUserDisplayName() }}!</h2>
+        <p>L&D Dashboard</p>
+        <router-outlet></router-outlet>
+    </div>
+    
+    
+</div>
