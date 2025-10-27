@@ -1,5 +1,6 @@
 export interface requestsViewDetails {
     requestId: number;
+    requestedBy: string;
     department: string;
     eventName: string;
     requestStatus: string;
