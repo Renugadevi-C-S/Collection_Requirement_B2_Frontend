@@ -2,6 +2,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { UserService } from '../../sevices/user.service';
 import { RequestService } from '../../sevices/request.service';
 import { LoginResponse } from '../../model/logInResponse';
@@ -11,7 +12,7 @@ import { Subscription, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-ldspoc-dashboard',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, CommonModule],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, CommonModule, FormsModule],
   templateUrl: './ldspoc-dashboard.component.html',
   styleUrl: './ldspoc-dashboard.component.css'
 })
@@ -23,9 +24,18 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
   filteredRequests: requestsViewDetails[] = [];
   isLoading: boolean = false;
   errorMessage: string = '';
-  searchTerm: string = '';
-  filterStatus: string = 'all';
   showHomeContent: boolean = true;
+
+  filters = {
+    requestId: '',
+    eventName: '',
+    department: '',
+    participants: null as number | null,
+    requestDate: '',
+    status: '',
+    justification: '',
+    requestedBy: ''
+  };
 
 
   constructor(
@@ -87,34 +97,81 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     let filtered = [...this.requests];
 
-    // Filter by status
-    if (this.filterStatus !== 'all') {
-      filtered = filtered.filter(req =>
-        req.requestStatus.toLowerCase() === this.filterStatus.toLowerCase()
+    // Filter by Request ID
+    if (this.filters.requestId) {
+      filtered = filtered.filter(req => 
+        req.requestId.toString().includes(this.filters.requestId)
       );
     }
 
-    // Filter by search term
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
+    // Filter by Event Name
+    if (this.filters.eventName) {
+      const term = this.filters.eventName.toLowerCase();
       filtered = filtered.filter(req =>
-        req.eventName?.toLowerCase().includes(term) ||
-        req.department?.toLowerCase().includes(term) ||
-        req.justification?.toLowerCase().includes(term) ||
-        req.requestId.toString().includes(term)
+        req.eventName?.toLowerCase().includes(term)
+      );
+    }
+
+    // Filter by Department
+    if (this.filters.department) {
+      const term = this.filters.department.toLowerCase();
+      filtered = filtered.filter(req =>
+        req.department?.toLowerCase().includes(term)
+      );
+    }
+
+    // Filter by Participants
+    if (this.filters.participants !== null && this.filters.participants !== undefined) {
+      filtered = filtered.filter(req =>
+        req.noOfParticipants === this.filters.participants
+      );
+    }
+
+    // Filter by Request Date
+    if (this.filters.requestDate) {
+      const term = this.filters.requestDate.toLowerCase();
+      filtered = filtered.filter(req =>
+        this.formatDate(req.requestDate).toLowerCase().includes(term)
+      );
+    }
+
+    // Filter by Status
+    if (this.filters.status) {
+      filtered = filtered.filter(req => 
+        req.requestStatus.toLowerCase() === this.filters.status.toLowerCase()
+      );
+    }
+
+    // Filter by Justification
+    if (this.filters.justification) {
+      const term = this.filters.justification.toLowerCase();
+      filtered = filtered.filter(req =>
+        req.justification?.toLowerCase().includes(term)
+      );
+    }
+
+    // Filter by Requested By
+    if (this.filters.requestedBy) {
+      const term = this.filters.requestedBy.toLowerCase();
+      filtered = filtered.filter(req =>
+        req.requestedBy?.toLowerCase().includes(term)
       );
     }
 
     this.filteredRequests = filtered;
   }
 
-  onSearchChange(event: any): void {
-    this.searchTerm = event.target.value;
-    this.applyFilters();
-  }
-
-  onStatusFilterChange(event: any): void {
-    this.filterStatus = event.target.value;
+  clearFilters(): void {
+    this.filters = {
+      requestId: '',
+      eventName: '',
+      department: '',
+      participants: null,
+      requestDate: '',
+      status: '',
+      justification: '',
+      requestedBy: ''
+    };
     this.applyFilters();
   }
 
@@ -156,6 +213,20 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
 
   onEditRequest(requestId: number): void {
     this.router.navigate(['ldspoc-dashboard/edit-request', requestId]);
+  }
+
+  onAcceptRequest(requestId: number): void {
+    // Implement accept logic here
+    console.log('Accepting request:', requestId);
+    // You can add a confirmation dialog and then update the request status
+    // this.requestService.updateRequestStatus(requestId, 'approved').subscribe(...);
+  }
+
+  onRejectRequest(requestId: number): void {
+    // Implement reject logic here
+    console.log('Rejecting request:', requestId);
+    // You can add a confirmation dialog and then update the request status
+    // this.requestService.updateRequestStatus(requestId, 'rejected').subscribe(...);
   }
 
 

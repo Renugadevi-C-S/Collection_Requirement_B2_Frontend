@@ -1,60 +1,34 @@
 <div class="ldspoc-dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-title">
+            <h1>L&D Dashboard</h1>
+            <p class="welcome-text">Welcome, {{ getUserDisplayName() }}!</p>
+        </div>
+        
+    </div>
+    
     <nav class="nav-bar">
         <a routerLink="/ldspoc-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
         <a routerLink="/ldspoc-dashboard/create-event" routerLinkActive="active">Create Event</a>
         <a routerLink="/ldspoc-dashboard/view-events" routerLinkActive="active">View Events</a>
     </nav>
+    
     <div class="dashboard-content">
-        <h2>Welcome, {{ getUserDisplayName() }}!</h2>
-        <p>L&D Dashboard</p>
-        
         <!-- Home Content - Learning Champions Requests -->
         <div *ngIf="showHomeContent" class="home-content">
             <div class="section-header">
                 <h3>Learning Champions Requests</h3>
-                <button class="new-request-btn" (click)="onNewRequest()">
-                    <span class="btn-icon">+</span> Create New Request
-                </button>
+                <div class="section-header-actions">
+                    <button class="btn-new-request-list" (click)="onNewRequest()">
+                        <span class="plus-icon">+</span> New Request
+                    </button>
+                    <button class="btn-reload" (click)="refreshRequests()" [disabled]="isLoading" title="Reload requests">
+                        <span class="reload-icon">🔄</span> Reload
+                    </button>
+                </div>
             </div>
 
             <div class="requests-list-container">
-                <div class="header-section">
-                    <h2>Training Requests</h2>
-                    <button (click)="refreshRequests()" class="btn-refresh" [disabled]="isLoading">
-                        <span *ngIf="!isLoading">🔄 Refresh</span>
-                        <span *ngIf="isLoading">Loading...</span>
-                    </button>
-                </div>
-
-                <!-- Filters Section -->
-                <div class="filters-section">
-                    <div class="filter-group">
-                        <label for="search">Search:</label>
-                        <input 
-                            type="text"
-                            id="search"
-                            placeholder="Search by ID, event name, department..."
-                            (input)="onSearchChange($event)"
-                            class="search-input"
-                        />
-                    </div>
-                    <div class="filter-group">
-                        <label for="statusFilter">Status:</label>
-                        <select 
-                            id="statusFilter"
-                            (change)="onStatusFilterChange($event)"
-                            class="status-filter"
-                        >
-                            <option value="all">All Statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                            <option value="in progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                    </div>
-                </div>
-
                 <!-- Error Message -->
                 <div *ngIf="errorMessage" class="error-alert">
                     <span>⚠️ {{ errorMessage }}</span>
@@ -74,10 +48,10 @@
                 </div>
 
                 <!-- Requests Table -->
-                <div *ngIf="!isLoading && filteredRequests.length > 0" class="table-container">
+                <div *ngIf="!isLoading && requests.length > 0" class="table-container">
                     <table class="requests-table">
                         <thead>
-                            <tr>
+                            <tr class="header-row">
                                 <th>Request ID</th>
                                 <th>Event Name</th>
                                 <th>Department</th>
@@ -86,7 +60,95 @@
                                 <th>Status</th>
                                 <th>Justification</th>
                                 <th>Requested By</th>
-                                <th>Edit</th>
+                                <th>Actions</th>
+                            </tr>
+                            <tr class="filter-row">
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.requestId"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter ID"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.eventName"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter event"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.department"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter dept"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <input 
+                                        type="number"
+                                        [(ngModel)]="filters.participants"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter #"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.requestDate"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter date"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <select 
+                                        [(ngModel)]="filters.status"
+                                        (change)="applyFilters()"
+                                        class="column-filter-select"
+                                    >
+                                        <option value="">All Statuses</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
+                                        <option value="in progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                </th>
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.justification"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter text"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.requestedBy"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter user"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <button 
+                                        (click)="clearFilters()"
+                                        class="btn-clear-filter"
+                                        title="Clear all filters"
+                                    >
+                                        <span class="clear-icon">🔄</span> Clear
+                                    </button>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -107,9 +169,27 @@
                                     </div>
                                 </td>
                                 <td>{{ request.requestedBy }}</td>
-                                <td class="edit-actions">
-                                    <button class="edit-btn" (click)="onEditRequest(request.requestId)">
-                                        Edit
+                                <td class="action-buttons">
+                                    <button 
+                                        class="btn-action btn-edit" 
+                                        (click)="onEditRequest(request.requestId)"
+                                        title="Edit Request"
+                                    >
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button 
+                                        class="btn-action btn-accept" 
+                                        (click)="onAcceptRequest(request.requestId)"
+                                        title="Accept Request"
+                                    >
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button 
+                                        class="btn-action btn-reject" 
+                                        (click)="onRejectRequest(request.requestId)"
+                                        title="Reject Request"
+                                    >
+                                        <i class="fas fa-times"></i>
                                     </button>
                                 </td>
                             </tr>
