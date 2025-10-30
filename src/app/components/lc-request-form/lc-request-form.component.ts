@@ -10,6 +10,7 @@ import { Subscription, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-lc-request-form',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './lc-request-form.component.html',
   styleUrl: './lc-request-form.component.css'
@@ -94,7 +95,7 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
             alert(response.message);
             this.requestForm.reset();
             this.selectedFileName = 'No file selected';
-            this.router.navigate(['/lc-dashboard/view-requests']);
+            this.router.navigate(['/lc-dashboard']);
           }
         });
     } else {
@@ -108,6 +109,10 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
   onReset(): void {
     this.requestForm.reset();
     this.selectedFileName = 'No file selected';
+  }
+
+  onBack(): void {
+    this.router.navigate(['/lc-dashboard']);
   }
 
   isFieldInvalid(fieldName: string): boolean {

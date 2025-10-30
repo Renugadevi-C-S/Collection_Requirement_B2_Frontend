@@ -8,6 +8,7 @@ import { Subscription, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-lc-requests-list',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './lc-requests-list.component.html',
   styleUrl: './lc-requests-list.component.css'
