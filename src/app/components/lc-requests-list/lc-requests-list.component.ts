@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { UserService } from '../../sevices/user.service';
 import { RequestService } from '../../sevices/request.service';
 import { requestsViewDetails } from '../../model/requestsViewDetails';
@@ -9,7 +10,7 @@ import { Subscription, catchError, of } from 'rxjs';
 @Component({
   selector: 'app-lc-requests-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './lc-requests-list.component.html',
   styleUrl: './lc-requests-list.component.css'
 })
@@ -21,8 +22,16 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
   private userSubscription?: Subscription;
   isLoading: boolean = false;
   errorMessage: string = '';
-  searchTerm: string = '';
-  filterStatus: string = 'all';
+  
+  filters = {
+    requestId: '',
+    eventName: '',
+    department: '',
+    participants: null as number | null,
+    requestDate: '',
+    status: '',
+    justification: ''
+  };
 
   constructor(
     private userService: UserService,
@@ -71,34 +80,72 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     let filtered = [...this.requests];
 
-    // Filter by status
-    if (this.filterStatus !== 'all') {
+    // Filter by Request ID
+    if (this.filters.requestId) {
       filtered = filtered.filter(req => 
-        req.requestStatus.toLowerCase() === this.filterStatus.toLowerCase()
+        req.requestId.toString().includes(this.filters.requestId)
       );
     }
 
-    // Filter by search term
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
+    // Filter by Event Name
+    if (this.filters.eventName) {
+      const term = this.filters.eventName.toLowerCase();
       filtered = filtered.filter(req =>
-        req.eventName?.toLowerCase().includes(term) ||
-        req.department?.toLowerCase().includes(term) ||
-        req.justification?.toLowerCase().includes(term) ||
-        req.requestId.toString().includes(term)
+        req.eventName?.toLowerCase().includes(term)
+      );
+    }
+
+    // Filter by Department
+    if (this.filters.department) {
+      const term = this.filters.department.toLowerCase();
+      filtered = filtered.filter(req =>
+        req.department?.toLowerCase().includes(term)
+      );
+    }
+
+    // Filter by Participants
+    if (this.filters.participants !== null && this.filters.participants !== undefined) {
+      filtered = filtered.filter(req =>
+        req.noOfParticipants === this.filters.participants
+      );
+    }
+
+    // Filter by Request Date
+    if (this.filters.requestDate) {
+      const term = this.filters.requestDate.toLowerCase();
+      filtered = filtered.filter(req =>
+        this.formatDate(req.requestDate).toLowerCase().includes(term)
+      );
+    }
+
+    // Filter by Status
+    if (this.filters.status) {
+      filtered = filtered.filter(req => 
+        req.requestStatus.toLowerCase() === this.filters.status.toLowerCase()
+      );
+    }
+
+    // Filter by Justification
+    if (this.filters.justification) {
+      const term = this.filters.justification.toLowerCase();
+      filtered = filtered.filter(req =>
+        req.justification?.toLowerCase().includes(term)
       );
     }
 
     this.filteredRequests = filtered;
   }
 
-  onSearchChange(event: any): void {
-    this.searchTerm = event.target.value;
-    this.applyFilters();
-  }
-
-  onStatusFilterChange(event: any): void {
-    this.filterStatus = event.target.value;
+  clearFilters(): void {
+    this.filters = {
+      requestId: '',
+      eventName: '',
+      department: '',
+      participants: null,
+      requestDate: '',
+      status: '',
+      justification: ''
+    };
     this.applyFilters();
   }
 

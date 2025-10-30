@@ -2,7 +2,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  font-family: "Ford Antenna", Arial, sans-serif;
+  font-family: "Ford Antenna", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   background-color: #f0f2f5;
   color: #333;
 }
@@ -42,6 +43,8 @@
   padding: 12px 24px;
   font-size: 1em;
   font-weight: 600;
+  font-family: "Ford Antenna", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;

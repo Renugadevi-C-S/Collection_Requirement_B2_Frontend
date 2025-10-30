@@ -3,35 +3,6 @@
     <h2>My Training Requests</h2>
   </div>
 
-  <!-- Filters Section -->
-  <div class="filters-section">
-    <div class="filter-group">
-      <label for="search">Search:</label>
-      <input 
-        type="text"
-        id="search"
-        placeholder="Search by ID, event name, department..."
-        (input)="onSearchChange($event)"
-        class="search-input"
-      />
-    </div>
-    <div class="filter-group">
-      <label for="statusFilter">Status:</label>
-      <select 
-        id="statusFilter"
-        (change)="onStatusFilterChange($event)"
-        class="status-filter"
-      >
-        <option value="all">All Statuses</option>
-        <option value="pending">Pending</option>
-        <option value="approved">Approved</option>
-        <option value="rejected">Rejected</option>
-        <option value="in progress">In Progress</option>
-        <option value="completed">Completed</option>
-      </select>
-    </div>
-  </div>
-
   <!-- Error Message -->
   <div *ngIf="errorMessage" class="error-alert">
     <span>⚠️ {{ errorMessage }}</span>
@@ -51,10 +22,10 @@
   </div>
 
   <!-- Requests Table -->
-  <div *ngIf="!isLoading && filteredRequests.length > 0" class="table-container">
+  <div *ngIf="!isLoading && requests.length > 0" class="table-container">
     <table class="requests-table">
       <thead>
-        <tr>
+        <tr class="header-row">
           <th>Request ID</th>
           <th>Event Name</th>
           <th>Department</th>
@@ -62,6 +33,86 @@
           <th>Request Date</th>
           <th>Status</th>
           <th>Justification</th>
+          <th>Actions</th>
+        </tr>
+        <tr class="filter-row">
+          <th>
+            <input 
+              type="text"
+              [(ngModel)]="filters.requestId"
+              (input)="applyFilters()"
+              placeholder="Filter ID"
+              class="column-filter"
+            />
+          </th>
+          <th>
+            <input 
+              type="text"
+              [(ngModel)]="filters.eventName"
+              (input)="applyFilters()"
+              placeholder="Filter event"
+              class="column-filter"
+            />
+          </th>
+          <th>
+            <input 
+              type="text"
+              [(ngModel)]="filters.department"
+              (input)="applyFilters()"
+              placeholder="Filter dept"
+              class="column-filter"
+            />
+          </th>
+          <th>
+            <input 
+              type="number"
+              [(ngModel)]="filters.participants"
+              (input)="applyFilters()"
+              placeholder="Filter #"
+              class="column-filter"
+            />
+          </th>
+          <th>
+            <input 
+              type="text"
+              [(ngModel)]="filters.requestDate"
+              (input)="applyFilters()"
+              placeholder="Filter date"
+              class="column-filter"
+            />
+          </th>
+          <th>
+            <select 
+              [(ngModel)]="filters.status"
+              (change)="applyFilters()"
+              class="column-filter-select"
+            >
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="in progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </th>
+          <th>
+            <input 
+              type="text"
+              [(ngModel)]="filters.justification"
+              (input)="applyFilters()"
+              placeholder="Filter text"
+              class="column-filter"
+            />
+          </th>
+          <th>
+            <button 
+              (click)="clearFilters()"
+              class="btn-clear-filter"
+              title="Clear all filters"
+            >
+              <span class="clear-icon">🔄</span> Clear
+            </button>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -80,6 +131,9 @@
             <div class="justification-text" [title]="request.justification">
               {{ request.justification }}
             </div>
+          </td>
+          <td class="text-center">
+            <!-- Edit/View actions can be added here if needed -->
           </td>
         </tr>
       </tbody>
