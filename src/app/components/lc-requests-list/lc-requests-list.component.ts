@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserService } from '../../sevices/user.service';
-import { RequestService } from '../../sevices/request.service';
+import { UserService } from '../../services/user.service';
+import { RequestService } from '../../services/request.service';
 import { requestsViewDetails } from '../../model/requestsViewDetails';
 import { LoginResponse } from '../../model/logInResponse';
 import { Subscription, catchError, of } from 'rxjs';
