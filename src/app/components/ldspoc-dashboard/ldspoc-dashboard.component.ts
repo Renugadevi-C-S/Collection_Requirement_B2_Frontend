@@ -37,6 +37,10 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
   submissionError: string = '';
   showNotesError: boolean = false;
 
+  // View details modal properties
+  showViewModal: boolean = false;
+  selectedViewRequest: requestsViewDetails | null = null;
+
   filters = {
     requestId: '',
     eventName: '',
@@ -323,5 +327,13 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
   }
 
 
-    
+    viewRequestDetails(request: requestsViewDetails): void {
+    this.selectedViewRequest = request;
+    this.showViewModal = true;
+  }
+
+  closeViewModal(): void {
+    this.showViewModal = false;
+    this.selectedViewRequest = null;
+  }
 }
