@@ -23,6 +23,10 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   errorMessage: string = '';
   
+  // Modal properties
+  showModal: boolean = false;
+  selectedRequest: requestsViewDetails | null = null;
+  
   filters = {
     requestId: '',
     eventName: '',
@@ -179,6 +183,18 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
 
   refreshRequests(): void {
     this.loadRequests();
+  }
+
+  // Modal methods
+  viewRequestDetails(request: requestsViewDetails): void {
+    this.selectedRequest = request;
+    console.log('Selected Request:', this.selectedRequest);
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.selectedRequest = null;
   }
 }
 
