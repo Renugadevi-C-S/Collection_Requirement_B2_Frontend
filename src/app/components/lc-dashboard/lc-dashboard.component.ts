@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { UserService } from '../../sevices/user.service';
+import { UserService } from '../../services/user.service';
 import { LoginResponse } from '../../model/logInResponse';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
