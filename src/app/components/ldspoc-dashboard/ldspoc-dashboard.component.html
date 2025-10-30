@@ -179,15 +179,17 @@
                                     </button>
                                     <button 
                                         class="btn-action btn-accept" 
-                                        (click)="onAcceptRequest(request.requestId)"
-                                        title="Accept Request"
+                                        (click)="onApproveRequest(request)"
+                                        [disabled]="request.requestStatus.toLowerCase() === 'approved'"
+                                        [title]="request.requestStatus.toLowerCase() === 'approved' ? 'Already Approved' : 'Approve Request'"
                                     >
                                         <i class="fas fa-check"></i>
                                     </button>
                                     <button 
                                         class="btn-action btn-reject" 
-                                        (click)="onRejectRequest(request.requestId)"
-                                        title="Reject Request"
+                                        (click)="onRejectRequest(request)"
+                                        [disabled]="request.requestStatus.toLowerCase() === 'rejected'"
+                                        [title]="request.requestStatus.toLowerCase() === 'rejected' ? 'Already Rejected' : 'Reject Request'"
                                     >
                                         <i class="fas fa-times"></i>
                                     </button>
@@ -206,5 +208,54 @@
         
         <!-- Router Outlet for other pages -->
         <router-outlet></router-outlet>
+    </div>
+</div>
+
+<!-- Approval/Rejection Modal -->
+<div *ngIf="showApprovalModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ isApprovalAction ? 'Approve Request' : 'Reject Request' }}</h3>
+            <button class="btn-close" (click)="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Request ID: <strong>#{{ selectedRequest?.requestId }}</strong></p>
+            <p>Requested By: <strong>{{ selectedRequest?.requestedBy }}</strong></p>
+            <p>Department: <strong>{{ selectedRequest?.department }}</strong></p>
+            
+            <div class="form-group">
+                <label for="approvalNotes">
+                    {{ isApprovalAction ? 'Approval' : 'Rejection' }} Notes <span class="required">*</span>
+                </label>
+                <textarea 
+                    id="approvalNotes"
+                    [(ngModel)]="approvalNotes"
+                    rows="4"
+                    placeholder="Enter notes for this {{ isApprovalAction ? 'approval' : 'rejection' }}"
+                    class="form-control"
+                    [class.is-invalid]="showNotesError"
+                ></textarea>
+                <small class="error-message" *ngIf="showNotesError">
+                    Notes are required (minimum 10 characters)
+                </small>
+            </div>
+
+            <div *ngIf="submissionError" class="error-alert">
+                <span>⚠️ {{ submissionError }}</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="closeModal()" [disabled]="isSubmittingApproval">
+                Cancel
+            </button>
+            <button 
+                [class]="isApprovalAction ? 'btn-primary' : 'btn-danger'" 
+                (click)="submitApproval()"
+                [disabled]="isSubmittingApproval"
+            >
+                <span *ngIf="!isSubmittingApproval">{{ isApprovalAction ? 'Approve' : 'Reject' }}</span>
+                <span *ngIf="isSubmittingApproval">Processing...</span>
+            </button>
+        </div>
     </div>
 </div>

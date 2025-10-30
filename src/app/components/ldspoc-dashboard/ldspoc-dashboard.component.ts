@@ -5,8 +5,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../services/user.service';
 import { RequestService } from '../../services/request.service';
+import { ApprovalService } from '../../services/approval.service';
 import { LoginResponse } from '../../model/logInResponse';
 import { requestsViewDetails } from '../../model/requestsViewDetails';
+import { NewApprovalDetails } from '../../model/newApprovalDetails';
 import { Subscription, catchError, of } from 'rxjs';
 
 
@@ -26,6 +28,15 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   showHomeContent: boolean = true;
 
+  // Modal properties
+  showApprovalModal: boolean = false;
+  selectedRequest: requestsViewDetails | null = null;
+  approvalNotes: string = '';
+  isApprovalAction: boolean = true; // true for approve, false for reject
+  isSubmittingApproval: boolean = false;
+  submissionError: string = '';
+  showNotesError: boolean = false;
+
   filters = {
     requestId: '',
     eventName: '',
@@ -41,6 +52,7 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private userService: UserService,
     private requestService: RequestService,
+    private approvalService: ApprovalService,
     private router: Router,
   ) {}
 
@@ -215,18 +227,99 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['ldspoc-dashboard/edit-request', requestId]);
   }
 
-  onAcceptRequest(requestId: number): void {
-    // Implement accept logic here
-    console.log('Accepting request:', requestId);
-    // You can add a confirmation dialog and then update the request status
-    // this.requestService.updateRequestStatus(requestId, 'approved').subscribe(...);
+  onApproveRequest(request: requestsViewDetails): void {
+    // Check if already approved
+    if (request.requestStatus.toLowerCase() === 'approved') {
+      return;
+    }
+    
+    this.selectedRequest = request;
+    this.isApprovalAction = true;
+    this.approvalNotes = '';
+    this.submissionError = '';
+    this.showNotesError = false;
+    this.showApprovalModal = true;
   }
 
-  onRejectRequest(requestId: number): void {
-    // Implement reject logic here
-    console.log('Rejecting request:', requestId);
-    // You can add a confirmation dialog and then update the request status
-    // this.requestService.updateRequestStatus(requestId, 'rejected').subscribe(...);
+  onRejectRequest(request: requestsViewDetails): void {
+    // Check if already rejected
+    if (request.requestStatus.toLowerCase() === 'rejected') {
+      return;
+    }
+    
+    this.selectedRequest = request;
+    this.isApprovalAction = false;
+    this.approvalNotes = '';
+    this.submissionError = '';
+    this.showNotesError = false;
+    this.showApprovalModal = true;
+  }
+
+  closeModal(): void {
+    if (!this.isSubmittingApproval) {
+      this.showApprovalModal = false;
+      this.selectedRequest = null;
+      this.approvalNotes = '';
+      this.submissionError = '';
+      this.showNotesError = false;
+    }
+  }
+
+  submitApproval(): void {
+    // Validate notes
+    if (!this.approvalNotes || this.approvalNotes.trim().length < 10) {
+      this.showNotesError = true;
+      return;
+    }
+
+    if (!this.selectedRequest || !this.currentUser) {
+      this.submissionError = 'Missing required information';
+      return;
+    }
+
+    this.showNotesError = false;
+    this.isSubmittingApproval = true;
+    this.submissionError = '';
+
+    const approvalDetails: NewApprovalDetails = {
+      requestId: this.selectedRequest.requestId,
+      approvedBy: this.currentUser.cdsId,
+      approvalStatus: this.isApprovalAction ? 'Approved' : 'Rejected',
+      approvalNotes: this.approvalNotes.trim()
+    };
+
+    this.approvalService.submitApproval(approvalDetails)
+      .pipe(
+        catchError(err => {
+          console.error('Error submitting approval:', err);
+          this.submissionError = 'Failed to submit. Please try again.';
+          this.isSubmittingApproval = false;
+          return of(null);
+        })
+      )
+      .subscribe(response => {
+        if (response) {
+          // Update the request status in the local list
+          const requestIndex = this.requests.findIndex(r => r.requestId === this.selectedRequest?.requestId);
+          if (requestIndex !== -1) {
+            this.requests[requestIndex].requestStatus = this.isApprovalAction ? 'Approved' : 'Rejected';
+          }
+          alert(response.message);
+          
+          this.applyFilters();
+          
+          // Close modal and reset
+          this.showApprovalModal = false;
+          this.selectedRequest = null;
+          this.approvalNotes = '';
+          this.isSubmittingApproval = false;
+          
+          // Optionally reload all requests to ensure data consistency
+          // this.loadRequests();
+        } else {
+          this.isSubmittingApproval = false;
+        }
+      });
   }
 
 
