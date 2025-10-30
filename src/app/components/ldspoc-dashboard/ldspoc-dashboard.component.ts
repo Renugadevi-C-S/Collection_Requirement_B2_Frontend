@@ -154,8 +154,8 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
     if (this.filters.requestedBy) {
       const term = this.filters.requestedBy.toLowerCase();
       filtered = filtered.filter(req =>
-        req.requestedBy?.toLowerCase().includes(term)
-      );
+        req.requestedBy?.toLowerCase() === term
+            );
     }
 
     this.filteredRequests = filtered;
