@@ -1,5 +1,5 @@
 .app-header {
-  background-color: #003366;
+  background-color: var(--ford-blue, #203B6D);
   color: #ffffff;
   padding: 0 30px;
   height: 60px;
@@ -56,5 +56,5 @@
 
 .logout-button:hover {
   background-color: #ffffff;
-  color: #003366;
+  color: var(--ford-blue, #1c3b6b);
 }

@@ -8,7 +8,7 @@
 }
 
 .nav-bar {
-  background-color: #003366;
+  background-color: var(--ford-blue, #1c3b6b);
   padding: 15px 30px;
   display: flex;
   justify-content: flex-start;
