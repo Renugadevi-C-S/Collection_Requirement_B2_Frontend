@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   
+  fordLogo = 'ford-logo.png';
   currentUser: LoginResponse | null = null;
   private userSubscription?: Subscription;
 
