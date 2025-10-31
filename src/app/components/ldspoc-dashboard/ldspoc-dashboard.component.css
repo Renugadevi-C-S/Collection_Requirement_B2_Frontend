@@ -938,6 +938,24 @@ body {
   max-width: 800px;
 }
 
+.view-modal .modal-header {
+  background: linear-gradient(135deg, var(--ford-blue, #1c3b6b) 0%, #004488 100%);
+  color: white;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
+}
+
+.view-modal .modal-header h2 {
+  margin: 0;
+  font-size: 1.5em;
+  font-weight: 600;
+  color: white;
+}
+
 .btn-close-modal {
   background: transparent;
   border: none;
@@ -1023,6 +1041,15 @@ body {
 
 .btn-modal-close:active {
   transform: translateY(0);
+}
+
+.view-modal .modal-footer {
+  padding: 20px 30px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
+  background-color: #f8f9fa;
+  border-radius: 0 0 8px 8px;
 }
 
 /* Modal Responsive for View Modal */
