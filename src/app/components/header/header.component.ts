@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { UserService } from '../../sevices/user.service';
+import { UserService } from '../../services/user.service';
 import { LoginResponse } from '../../model/logInResponse';
 import { Subscription } from 'rxjs';
 
@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   
+  fordLogo = 'ford-logo.png';
   currentUser: LoginResponse | null = null;
   private userSubscription?: Subscription;
 

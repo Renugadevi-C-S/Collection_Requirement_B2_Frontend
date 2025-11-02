@@ -1,5 +1,10 @@
 <div class="request-form-container">
-  <h2>Submit Training Request</h2>
+  <div class="form-header">
+    <button type="button" class="btn-back" (click)="onBack()" title="Back to Dashboard">
+      <span class="back-icon">←</span> Back
+    </button>
+    <h2>Submit Training Request</h2>
+  </div>
   
   <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" class="request-form">
     
@@ -77,6 +82,7 @@
         <option value="" disabled selected>Select Department</option>
         <option value="Engineering">Engineering</option>
         <option value="IT">IT</option>
+        <option value="ET">ET</option>
         <option value="HR">HR</option>
         <option value="Finance">Finance</option>
         <option value="Operations">Operations</option>

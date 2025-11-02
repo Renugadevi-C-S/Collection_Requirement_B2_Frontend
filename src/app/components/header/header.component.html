@@ -1,6 +1,7 @@
 <header class="app-header">
   <div class="header-title">
-    <span>Ford ET L&D</span>
+    <img [src]="fordLogo" alt="Ford Logo" class="ford-logo">
+    <span>ET L&D</span>
   </div>
   <div *ngIf="currentUser" class="header-actions">
     <span class="user-info">Welcome, {{ getUserDisplayName() }} ({{ currentUser.role }})</span>

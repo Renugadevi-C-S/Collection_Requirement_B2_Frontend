@@ -9,4 +9,6 @@ export interface requestsViewDetails {
     justification: string;
     tanNo: string;
     curriculum: string;
+    approvedBy: string;
+    approvalNotes: string;
 }

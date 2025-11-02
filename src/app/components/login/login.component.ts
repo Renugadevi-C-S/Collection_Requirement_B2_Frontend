@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserService } from '../../sevices/user.service';
-import { LoginResponse } from '../../model/logInResponse';
-import { Observable, catchError, of } from 'rxjs'; 
+import { UserService } from '../../services/user.service';
+import { catchError, of } from 'rxjs'; 
 
 @Component({
   selector: 'app-login',

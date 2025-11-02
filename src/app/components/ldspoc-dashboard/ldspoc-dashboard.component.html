@@ -1,60 +1,34 @@
 <div class="ldspoc-dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-title">
+            <h1>L&D Dashboard</h1>
+            <p class="welcome-text">Welcome, {{ getUserDisplayName() }}!</p>
+        </div>
+        
+    </div>
+    
     <nav class="nav-bar">
         <a routerLink="/ldspoc-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
         <a routerLink="/ldspoc-dashboard/create-event" routerLinkActive="active">Create Event</a>
         <a routerLink="/ldspoc-dashboard/view-events" routerLinkActive="active">View Events</a>
     </nav>
+    
     <div class="dashboard-content">
-        <h2>Welcome, {{ getUserDisplayName() }}!</h2>
-        <p>L&D Dashboard</p>
-        
         <!-- Home Content - Learning Champions Requests -->
         <div *ngIf="showHomeContent" class="home-content">
             <div class="section-header">
                 <h3>Learning Champions Requests</h3>
-                <button class="new-request-btn" (click)="onNewRequest()">
-                    <span class="btn-icon">+</span> Create New Request
-                </button>
+                <div class="section-header-actions">
+                    <button class="btn-new-request-list" (click)="onNewRequest()">
+                        <span class="plus-icon">+</span> New Request
+                    </button>
+                    <button class="btn-reload" (click)="refreshRequests()" [disabled]="isLoading" title="Reload requests">
+                        <span class="reload-icon">🔄</span> Reload
+                    </button>
+                </div>
             </div>
 
             <div class="requests-list-container">
-                <div class="header-section">
-                    <h2>Training Requests</h2>
-                    <button (click)="refreshRequests()" class="btn-refresh" [disabled]="isLoading">
-                        <span *ngIf="!isLoading">🔄 Refresh</span>
-                        <span *ngIf="isLoading">Loading...</span>
-                    </button>
-                </div>
-
-                <!-- Filters Section -->
-                <div class="filters-section">
-                    <div class="filter-group">
-                        <label for="search">Search:</label>
-                        <input 
-                            type="text"
-                            id="search"
-                            placeholder="Search by ID, event name, department..."
-                            (input)="onSearchChange($event)"
-                            class="search-input"
-                        />
-                    </div>
-                    <div class="filter-group">
-                        <label for="statusFilter">Status:</label>
-                        <select 
-                            id="statusFilter"
-                            (change)="onStatusFilterChange($event)"
-                            class="status-filter"
-                        >
-                            <option value="all">All Statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                            <option value="in progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                    </div>
-                </div>
-
                 <!-- Error Message -->
                 <div *ngIf="errorMessage" class="error-alert">
                     <span>⚠️ {{ errorMessage }}</span>
@@ -74,10 +48,10 @@
                 </div>
 
                 <!-- Requests Table -->
-                <div *ngIf="!isLoading && filteredRequests.length > 0" class="table-container">
+                <div *ngIf="!isLoading && requests.length > 0" class="table-container">
                     <table class="requests-table">
                         <thead>
-                            <tr>
+                            <tr class="header-row">
                                 <th>Request ID</th>
                                 <th>Event Name</th>
                                 <th>Department</th>
@@ -86,7 +60,95 @@
                                 <th>Status</th>
                                 <th>Justification</th>
                                 <th>Requested By</th>
-                                <th>Edit</th>
+                                <th>Actions</th>
+                            </tr>
+                            <tr class="filter-row">
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.requestId"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter ID"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.eventName"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter event"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.department"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter dept"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <input 
+                                        type="number"
+                                        [(ngModel)]="filters.participants"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter #"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.requestDate"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter date"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <select 
+                                        [(ngModel)]="filters.status"
+                                        (change)="applyFilters()"
+                                        class="column-filter-select"
+                                    >
+                                        <option value="">All Statuses</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
+                                        <option value="in progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                </th>
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.justification"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter text"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <input 
+                                        type="text"
+                                        [(ngModel)]="filters.requestedBy"
+                                        (input)="applyFilters()"
+                                        placeholder="Filter user"
+                                        class="column-filter"
+                                    />
+                                </th>
+                                <th>
+                                    <button 
+                                        (click)="clearFilters()"
+                                        class="btn-clear-filter"
+                                        title="Clear all filters"
+                                    >
+                                        <span class="clear-icon">🔄</span> Clear
+                                    </button>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -107,9 +169,36 @@
                                     </div>
                                 </td>
                                 <td>{{ request.requestedBy }}</td>
-                                <td class="edit-actions">
-                                    <button class="edit-btn" (click)="onEditRequest(request.requestId)">
-                                        Edit
+                                <td class="action-buttons">
+                                    <button 
+                                        class="btn-action btn-view" 
+                                        (click)="viewRequestDetails(request)"
+                                        title="View Details"
+                                    >
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button 
+                                        class="btn-action btn-edit" 
+                                        (click)="onEditRequest(request.requestId)"
+                                        title="Edit Request"
+                                    >
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button 
+                                        class="btn-action btn-accept" 
+                                        (click)="onApproveRequest(request)"
+                                        [disabled]="request.requestStatus.toLowerCase() === 'approved'"
+                                        [title]="request.requestStatus.toLowerCase() === 'approved' ? 'Already Approved' : 'Approve Request'"
+                                    >
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button 
+                                        class="btn-action btn-reject" 
+                                        (click)="onRejectRequest(request)"
+                                        [disabled]="request.requestStatus.toLowerCase() === 'rejected'"
+                                        [title]="request.requestStatus.toLowerCase() === 'rejected' ? 'Already Rejected' : 'Reject Request'"
+                                    >
+                                        <i class="fas fa-times"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -126,5 +215,134 @@
         
         <!-- Router Outlet for other pages -->
         <router-outlet></router-outlet>
+    </div>
+</div>
+
+<!-- Approval/Rejection Modal -->
+<div *ngIf="showApprovalModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ isApprovalAction ? 'Approve Request' : 'Reject Request' }}</h3>
+            <button class="btn-close" (click)="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Request ID: <strong>#{{ selectedRequest?.requestId }}</strong></p>
+            <p>Requested By: <strong>{{ selectedRequest?.requestedBy }}</strong></p>
+            <p>Department: <strong>{{ selectedRequest?.department }}</strong></p>
+            
+            <div class="form-group">
+                <label for="approvalNotes">
+                    {{ isApprovalAction ? 'Approval' : 'Rejection' }} Notes <span class="required">*</span>
+                </label>
+                <textarea 
+                    id="approvalNotes"
+                    [(ngModel)]="approvalNotes"
+                    rows="4"
+                    placeholder="Enter notes for this {{ isApprovalAction ? 'approval' : 'rejection' }}"
+                    class="form-control"
+                    [class.is-invalid]="showNotesError"
+                ></textarea>
+                <small class="error-message" *ngIf="showNotesError">
+                    Notes are required (minimum 10 characters)
+                </small>
+            </div>
+
+            <div *ngIf="submissionError" class="error-alert">
+                <span>⚠️ {{ submissionError }}</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="closeModal()" [disabled]="isSubmittingApproval">
+                Cancel
+            </button>
+            <button 
+                [class]="isApprovalAction ? 'btn-primary' : 'btn-danger'" 
+                (click)="submitApproval()"
+                [disabled]="isSubmittingApproval"
+            >
+                <span *ngIf="!isSubmittingApproval">{{ isApprovalAction ? 'Approve' : 'Reject' }}</span>
+                <span *ngIf="isSubmittingApproval">Processing...</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- View Request Details Modal -->
+<div *ngIf="showViewModal" class="modal-overlay" (click)="closeViewModal()">
+    <div class="modal-content view-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Request Details</h2>
+            <button class="btn-close-modal" (click)="closeViewModal()" title="Close">✕</button>
+        </div>
+        
+        <div class="modal-body" *ngIf="selectedViewRequest">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Request ID:</label>
+                    <span class="detail-value">{{ selectedViewRequest.requestId }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Event Name:</label>
+                    <span class="detail-value">{{ selectedViewRequest.eventName || 'EventNotCreated' }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Requested By:</label>
+                    <span class="detail-value">{{ selectedViewRequest.requestedBy }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Department:</label>
+                    <span class="detail-value">{{ selectedViewRequest.department }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Number of Participants:</label>
+                    <span class="detail-value">{{ selectedViewRequest.noOfParticipants }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Request Date:</label>
+                    <span class="detail-value">{{ formatDate(selectedViewRequest.requestDate) }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Status:</label>
+                    <span [class]="'status-badge ' + getStatusClass(selectedViewRequest.requestStatus)">
+                        {{ selectedViewRequest.requestStatus }}
+                    </span>
+                </div>
+                
+                <div class="detail-item">
+                    <label>TAN Number:</label>
+                    <span class="detail-value">{{ selectedViewRequest.tanNo || 'N/A' }}</span>
+                </div>
+                
+                <div class="detail-item full-width">
+                    <label>Curriculum:</label>
+                    <span class="detail-value">{{ selectedViewRequest.curriculum || 'N/A' }}</span>
+                </div>
+                
+                <div class="detail-item full-width">
+                    <label>Justification:</label>
+                    <div class="detail-value justification-full">{{ selectedViewRequest.justification }}</div>
+                </div>
+
+                  <div class="detail-item">
+                    <label>Approved By:</label>
+                    <span class="detail-value">{{ selectedViewRequest.approvedBy || 'N/A' }}</span>
+                </div>
+                
+                <div class="detail-item full-width">
+                    <label>Approval Notes:</label>
+                    <div class="detail-value justification-full">{{ selectedViewRequest.approvalNotes || 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-modal-close" (click)="closeViewModal()">Close</button>
+        </div>
     </div>
 </div>

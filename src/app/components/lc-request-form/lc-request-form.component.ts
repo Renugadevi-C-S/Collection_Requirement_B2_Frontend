@@ -2,14 +2,15 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserService } from '../../sevices/user.service';
-import { RequestService } from '../../sevices/request.service';
+import { UserService } from '../../services/user.service';
+import { RequestService } from '../../services/request.service';
 import { requestDetails } from '../../model/requestDetails';
 import { LoginResponse } from '../../model/logInResponse';
 import { Subscription, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-lc-request-form',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './lc-request-form.component.html',
   styleUrl: './lc-request-form.component.css'
@@ -94,7 +95,7 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
             alert(response.message);
             this.requestForm.reset();
             this.selectedFileName = 'No file selected';
-            this.router.navigate(['/lc-dashboard/view-requests']);
+            this.router.navigate(['/lc-dashboard']);
           }
         });
     } else {
@@ -108,6 +109,10 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
   onReset(): void {
     this.requestForm.reset();
     this.selectedFileName = 'No file selected';
+  }
+
+  onBack(): void {
+    this.router.navigate(['/lc-dashboard']);
   }
 
   isFieldInvalid(fieldName: string): boolean {

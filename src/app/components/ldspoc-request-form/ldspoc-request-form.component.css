@@ -8,7 +8,7 @@
 }
 
 .request-form-container h2 {
-  color: #003366;
+  color: var(--ford-blue, #1c3b6b);
   margin-bottom: 10px;
   font-size: 1.8em;
   font-weight: 600;
@@ -17,12 +17,12 @@
 
 .request-id-info {
   background-color: #e7f3ff;
-  color: #003366;
+  color: var(--ford-blue, #1c3b6b);
   padding: 10px 15px;
   border-radius: 4px;
   margin-bottom: 20px;
   font-weight: 600;
-  border-left: 4px solid #003366;
+  border-left: 4px solid var(--ford-blue, #1c3b6b);
   text-align: center;
 }
 
@@ -40,7 +40,7 @@
   height: 50px;
   margin: 0 auto 20px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #003366;
+  border-top: 5px solid var(--ford-blue, #1c3b6b);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -112,8 +112,8 @@
 
 .form-control:focus {
   outline: none;
-  border-color: #003366;
-  box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.1);
+  border-color: var(--ford-blue, #1c3b6b);
+  box-shadow: 0 0 0 2px rgba(28, 59, 107, 0.1);
 }
 
 .form-control.is-invalid {
@@ -164,7 +164,7 @@ select.form-control {
 }
 
 .file-button {
-  background-color: #003366;
+  background-color: var(--ford-blue, #1c3b6b);
   color: white;
   padding: 10px 20px;
   border-radius: 4px;
@@ -174,7 +174,7 @@ select.form-control {
 }
 
 .file-button:hover {
-  background-color: #00509e;
+  background-color: var(--ford-blue-light, #2d4f7f);
 }
 
 .file-name {
@@ -225,14 +225,14 @@ select.form-control {
 }
 
 .btn-primary {
-  background-color: #003366;
+  background-color: var(--ford-blue, #1c3b6b);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #00509e;
+  background-color: var(--ford-blue-light, #2d4f7f);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 51, 102, 0.3);
+  box-shadow: 0 4px 8px rgba(28, 59, 107, 0.3);
 }
 
 .btn-secondary {
