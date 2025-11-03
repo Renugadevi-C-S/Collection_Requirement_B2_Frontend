@@ -7,6 +7,7 @@ import { UserService } from '../../services/user.service';
 import { approvedRequestForEvent } from '../../model/approvedRequestForEvent';
 import { LoginResponse } from '../../model/logInResponse';
 import { catchError, of } from 'rxjs';
+import {AvailableRequest} from '../../model/AvailableRequest';
 
 @Component({
   selector: 'app-ldspoc-event-form',
@@ -54,7 +55,7 @@ export class LdspocEventFormComponent implements OnInit {
 
   loadApprovedRequests(): void {
     this.isLoadingRequests = true;
-    this.eventService.getApprovedRequestsWithoutEvent()
+    this.eventService.getAvailableRequestsForEvent()
       .pipe(
         catchError(err => {
           console.error('Error loading approved requests:', err);
@@ -63,7 +64,7 @@ export class LdspocEventFormComponent implements OnInit {
           return of([]);
         })
       )
-      .subscribe(requests => {
+      .subscribe((requests : AvailableRequest[]) => {
         this.approvedRequests = requests;
         this.isLoadingRequests = false;
       });
@@ -124,10 +125,11 @@ export class LdspocEventFormComponent implements OnInit {
 
     const eventData = {
       ...this.eventForm.value,
-      requestIds: Array.from(this.selectedRequests)
+      requestIds: Array.from(this.selectedRequests),
+      createdBy: this.currentUser.cdsId
     };
 
-    this.eventService.createEvent(eventData, this.currentUser.cdsId)
+    this.eventService.createEvent(eventData)
       .pipe(
         catchError(err => {
           console.error('Error creating event:', err);
