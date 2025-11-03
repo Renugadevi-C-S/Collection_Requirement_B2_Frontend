@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { approvedRequestForEvent } from '../model/approvedRequestForEvent';
+import { AvailableRequest } from '../model/AvailableRequest';
+import { EventDetails } from '../model/eventDetails';
+import { EventViewDetails } from '../model/eventViewDetails';
+import { EventSubmitResponse } from '../model/eventSubmitResponse';
 
 @Injectable({
   providedIn: 'root'
@@ -12,23 +15,39 @@ export class EventService {
 
   constructor(private http: HttpClient) {}
 
-  // Get approved requests without events
-  getApprovedRequestsWithoutEvent(): Observable<approvedRequestForEvent[]> {
-    return this.http.get<approvedRequestForEvent[]>(`${this.baseUrl}/approved-requests`);
+  getAvailableRequestsForEvent(): Observable<AvailableRequest[]> {
+    return this.http.get<AvailableRequest[]>(`${this.baseUrl}/availableRequests`);
   }
 
-  // Create event with optional request linking
-  createEvent(eventData: any, cdsId: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/create/${cdsId}`, eventData);
+  createEvent(eventData: EventDetails): Observable<EventSubmitResponse> {
+    return this.http.post<EventSubmitResponse>(`${this.baseUrl}/create`, eventData);
   }
 
-  // Get all events
-  getAllEvents(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/all`);
+  getAllEvents(): Observable<EventViewDetails[]> {
+    return this.http.get<EventViewDetails[]>(`${this.baseUrl}/all`);
   }
 
-  // Get events by cdsId
-  getEventsByCdsId(cdsId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/user/${cdsId}`);
+  getEventById(eventId: number): Observable<EventViewDetails> {
+    return this.http.get<EventViewDetails>(`${this.baseUrl}/${eventId}`);
+  }
+
+  getEventsByCdsId(cdsId: string): Observable<EventViewDetails[]> {
+    return this.http.get<EventViewDetails[]>(`${this.baseUrl}/creator/${cdsId}`);
+  }
+
+  updateEvent(eventId: number, eventData: EventDetails): Observable<EventSubmitResponse> {
+    return this.http.patch<EventSubmitResponse>(`${this.baseUrl}/editEvent/${eventId}`, eventData);
+  }
+
+  deleteEvent(eventId: number): Observable<EventSubmitResponse> {
+    return this.http.delete<EventSubmitResponse>(`${this.baseUrl}/${eventId}`);
+  }
+
+  getEventsByStatus(status: string): Observable<EventViewDetails[]> {
+    return this.http.get<EventViewDetails[]>(`${this.baseUrl}/status/${status}`);
+  }
+
+  getEventsByType(eventType: string): Observable<EventViewDetails[]> {
+    return this.http.get<EventViewDetails[]>(`${this.baseUrl}/type/${eventType}`);
   }
 }
