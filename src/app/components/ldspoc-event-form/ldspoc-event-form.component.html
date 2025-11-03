@@ -1,1 +1,247 @@
-<p>ldspoc-event-form works!</p>
+<div class="create-event-container">
+  <div class="form-header">
+    <button type="button" class="btn-back" (click)="onBack()" title="Back to Dashboard">
+      <span class="back-icon">←</span> Back
+    </button>
+    <h2>Create Training Event</h2>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-alert">
+    <span>⚠️ {{ errorMessage }}</span>
+    <button (click)="errorMessage = ''" class="btn-close-error">✕</button>
+  </div>
+
+  <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="event-form">
+    
+    <!-- Event Name -->
+    <div class="form-group">
+      <label for="eventName">Event Name <span class="required">*</span></label>
+      <input 
+        type="text" 
+        id="eventName"
+        formControlName="eventName"
+        placeholder="Enter event name"
+        class="form-control"
+        [class.is-invalid]="isFieldInvalid('eventName')"
+      />
+      <small class="error-message" *ngIf="isFieldInvalid('eventName')">
+        {{ getErrorMessage('eventName') }}
+      </small>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label for="description">Description <span class="required">*</span></label>
+      <textarea 
+        id="description"
+        formControlName="description"
+        rows="4"
+        placeholder="Enter event description"
+        class="form-control"
+        [class.is-invalid]="isFieldInvalid('description')"
+      ></textarea>
+      <small class="error-message" *ngIf="isFieldInvalid('description')">
+        {{ getErrorMessage('description') }}
+      </small>
+    </div>
+
+    <!-- Duration and Event Type Row -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="duration">Duration (hours) <span class="required">*</span></label>
+        <input 
+          type="number"
+          id="duration"
+          formControlName="duration"
+          placeholder="e.g., 8"
+          min="1"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('duration')"
+        />
+        <small class="error-message" *ngIf="isFieldInvalid('duration')">
+          {{ getErrorMessage('duration') }}
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="eventType">Event Type <span class="required">*</span></label>
+        <select 
+          id="eventType"
+          formControlName="eventType"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('eventType')"
+        >
+          <option value="" disabled selected>Select Event Type</option>
+          <option value="Workshop">Workshop</option>
+          <option value="Seminar">Seminar</option>
+          <option value="Training">Training</option>
+          <option value="Conference">Conference</option>
+          <option value="Webinar">Webinar</option>
+          <option value="Certification">Certification</option>
+          <option value="Other">Other</option>
+        </select>
+        <small class="error-message" *ngIf="isFieldInvalid('eventType')">
+          {{ getErrorMessage('eventType') }}
+        </small>
+      </div>
+    </div>
+
+    <!-- Funding Source and Status Row -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="fundingSource">Funding Source <span class="required">*</span></label>
+        <select 
+          id="fundingSource"
+          formControlName="fundingSource"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('fundingSource')"
+        >
+          <option value="" disabled selected>Select Funding Source</option>
+          <option value="Company Budget">Company Budget</option>
+          <option value="Department Budget">Department Budget</option>
+          <option value="External Grant">External Grant</option>
+          <option value="Self-Funded">Self-Funded</option>
+          <option value="Other">Other</option>
+        </select>
+        <small class="error-message" *ngIf="isFieldInvalid('fundingSource')">
+          {{ getErrorMessage('fundingSource') }}
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="status">Event Status <span class="required">*</span></label>
+        <select 
+          id="status"
+          formControlName="status"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('status')"
+        >
+          <option value="Planned">Planned</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+        <small class="error-message" *ngIf="isFieldInvalid('status')">
+          {{ getErrorMessage('status') }}
+        </small>
+      </div>
+    </div>
+
+    <!-- Link Requests Section -->
+    <div class="link-requests-section">
+      <div class="section-header-toggle" (click)="toggleRequestsSection()">
+        <h3>Link Approved Requests (Optional)</h3>
+        <span class="toggle-icon">{{ showRequestsSection ? '▼' : '▶' }}</span>
+      </div>
+
+      <div *ngIf="showRequestsSection" class="requests-content">
+        
+        <!-- Selected Requests Summary -->
+        <div class="selected-summary">
+          <div class="summary-item">
+            <span class="summary-label">Selected Requests:</span>
+            <span class="summary-value">{{ selectedRequests.size }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Total Participants:</span>
+            <span class="summary-value participants-count">{{ calculatedParticipants }}</span>
+          </div>
+          <div class="summary-actions">
+            <button 
+              type="button" 
+              class="btn-select-all" 
+              (click)="selectAllRequests()"
+              [disabled]="approvedRequests.length === 0"
+            >
+              Select All
+            </button>
+            <button 
+              type="button" 
+              class="btn-clear-all" 
+              (click)="clearAllRequests()"
+              [disabled]="selectedRequests.size === 0"
+            >
+              Clear All
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoadingRequests" class="loading-container">
+          <div class="spinner"></div>
+          <p>Loading approved requests...</p>
+        </div>
+
+        <!-- No Requests Message -->
+        <div *ngIf="!isLoadingRequests && approvedRequests.length === 0" class="no-requests">
+          <p>No approved requests available to link</p>
+        </div>
+
+        <!-- Requests Table -->
+        <div *ngIf="!isLoadingRequests && approvedRequests.length > 0" class="requests-table-container">
+          <table class="requests-table">
+            <thead>
+              <tr>
+                <th class="checkbox-column">Select</th>
+                <th>Request ID</th>
+                <th>TAN Number</th>
+                <th>Department</th>
+                <th>Participants</th>
+                <th>Request Date</th>
+                <th>Requested By</th>
+                <th>Justification</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr 
+                *ngFor="let request of approvedRequests" 
+                [class.selected-row]="isRequestSelected(request.requestId)"
+                (click)="toggleRequestSelection(request.requestId)"
+              >
+                <td class="checkbox-column">
+                  <input 
+                    type="checkbox"
+                    [checked]="isRequestSelected(request.requestId)"
+                    (click)="$event.stopPropagation(); toggleRequestSelection(request.requestId)"
+                  />
+                </td>
+                <td class="request-id">#{{ request.requestId }}</td>
+                <td>{{ request.tanNumber }}</td>
+                <td>{{ request.department }}</td>
+                <td class="text-center">{{ request.noOfParticipants }}</td>
+                <td>{{ formatDate(request.requestDate) }}</td>
+                <td>{{ request.requestedBy }}</td>
+                <td class="justification">
+                  <div class="justification-text" [title]="request.justification">
+                    {{ request.justification }}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? 'Creating Event...' : 'Create Event' }}
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-secondary"
+        (click)="onReset()"
+        [disabled]="isSubmitting"
+      >
+        Reset
+      </button>
+    </div>
+  </form>
+</div>
+
