@@ -1,9 +1,19 @@
 <div class="create-event-container">
+  <!-- Header shows different title based on mode -->
   <div class="form-header">
-    <button type="button" class="btn-back" (click)="onBack()" title="Back to Dashboard">
+    <button type="button" class="btn-back" (click)="onBack()" title="Back to Events List">
       <span class="back-icon">←</span> Back
     </button>
-    <h2>Create Training Event</h2>
+    <h2>{{ isEditMode ? 'Edit Training Event' : 'Create Training Event' }}</h2>
+  </div>
+
+  <!-- Show event ID when editing -->
+  <p *ngIf="isEditMode && eventId" class="event-id-info">Event ID: #{{ eventId }}</p>
+
+  <!-- Loading overlay  -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading event data...</p>
   </div>
 
   <!-- Error Message -->
@@ -13,12 +23,27 @@
   </div>
 
   <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="event-form">
-    
+
+    <!-- Creator ID (Read-only) -->
+    <div class="form-group">
+      <label for="creatorId">Creator CDS ID</label>
+      <input
+        type="text"
+        id="creatorId"
+        [value]="getDisplayCreatorId()"
+        readonly
+        class="form-control readonly-field"
+      />
+      <small class="form-text">
+        {{ isEditMode ? 'Original creator (cannot be changed)' : 'This field is auto-filled from your login' }}
+      </small>
+    </div>
+
     <!-- Event Name -->
     <div class="form-group">
       <label for="eventName">Event Name <span class="required">*</span></label>
-      <input 
-        type="text" 
+      <input
+        type="text"
         id="eventName"
         formControlName="eventName"
         placeholder="Enter event name"
@@ -33,7 +58,7 @@
     <!-- Description -->
     <div class="form-group">
       <label for="description">Description <span class="required">*</span></label>
-      <textarea 
+      <textarea
         id="description"
         formControlName="description"
         rows="4"
@@ -50,7 +75,7 @@
     <div class="form-row">
       <div class="form-group">
         <label for="duration">Duration (hours) <span class="required">*</span></label>
-        <input 
+        <input
           type="number"
           id="duration"
           formControlName="duration"
@@ -66,13 +91,13 @@
 
       <div class="form-group">
         <label for="eventType">Event Type <span class="required">*</span></label>
-        <select 
+        <select
           id="eventType"
           formControlName="eventType"
           class="form-control"
           [class.is-invalid]="isFieldInvalid('eventType')"
         >
-          <option value="" disabled selected>Select Event Type</option>
+          <option value="" disabled>Select Event Type</option>
           <option value="Workshop">Workshop</option>
           <option value="Seminar">Seminar</option>
           <option value="Training">Training</option>
@@ -91,13 +116,13 @@
     <div class="form-row">
       <div class="form-group">
         <label for="fundingSource">Funding Source <span class="required">*</span></label>
-        <select 
+        <select
           id="fundingSource"
           formControlName="fundingSource"
           class="form-control"
           [class.is-invalid]="isFieldInvalid('fundingSource')"
         >
-          <option value="" disabled selected>Select Funding Source</option>
+          <option value="" disabled>Select Funding Source</option>
           <option value="Company Budget">Company Budget</option>
           <option value="Department Budget">Department Budget</option>
           <option value="External Grant">External Grant</option>
@@ -111,7 +136,7 @@
 
       <div class="form-group">
         <label for="status">Event Status <span class="required">*</span></label>
-        <select 
+        <select
           id="status"
           formControlName="status"
           class="form-control"
@@ -136,7 +161,7 @@
       </div>
 
       <div *ngIf="showRequestsSection" class="requests-content">
-        
+
         <!-- Selected Requests Summary -->
         <div class="selected-summary">
           <div class="summary-item">
@@ -148,17 +173,17 @@
             <span class="summary-value participants-count">{{ calculatedParticipants }}</span>
           </div>
           <div class="summary-actions">
-            <button 
-              type="button" 
-              class="btn-select-all" 
+            <button
+              type="button"
+              class="btn-select-all"
               (click)="selectAllRequests()"
-              [disabled]="approvedRequests.length === 0"
+              [disabled]="availableRequests.length === 0"
             >
               Select All
             </button>
-            <button 
-              type="button" 
-              class="btn-clear-all" 
+            <button
+              type="button"
+              class="btn-clear-all"
               (click)="clearAllRequests()"
               [disabled]="selectedRequests.size === 0"
             >
@@ -174,74 +199,82 @@
         </div>
 
         <!-- No Requests Message -->
-        <div *ngIf="!isLoadingRequests && approvedRequests.length === 0" class="no-requests">
+        <div *ngIf="!isLoadingRequests && availableRequests.length === 0" class="no-requests">
           <p>No approved requests available to link</p>
         </div>
 
         <!-- Requests Table -->
-        <div *ngIf="!isLoadingRequests && approvedRequests.length > 0" class="requests-table-container">
+        <div *ngIf="!isLoadingRequests && availableRequests.length > 0" class="requests-table-container">
           <table class="requests-table">
             <thead>
-              <tr>
-                <th class="checkbox-column">Select</th>
-                <th>Request ID</th>
-                <th>TAN Number</th>
-                <th>Department</th>
-                <th>Participants</th>
-                <th>Request Date</th>
-                <th>Requested By</th>
-                <th>Justification</th>
-              </tr>
+            <tr>
+              <th class="checkbox-column">Select</th>
+              <th>Request ID</th>
+              <th>TAN Number</th>
+              <th>Department</th>
+              <th>Participants</th>
+              <th>Request Date</th>
+              <th>Requested By</th>
+              <th>Justification</th>
+            </tr>
             </thead>
             <tbody>
-              <tr 
-                *ngFor="let request of approvedRequests" 
-                [class.selected-row]="isRequestSelected(request.requestId)"
-                (click)="toggleRequestSelection(request.requestId)"
-              >
-                <td class="checkbox-column">
-                  <input 
-                    type="checkbox"
-                    [checked]="isRequestSelected(request.requestId)"
-                    (click)="$event.stopPropagation(); toggleRequestSelection(request.requestId)"
-                  />
-                </td>
-                <td class="request-id">#{{ request.requestId }}</td>
-                <td>{{ request.tanNumber }}</td>
-                <td>{{ request.department }}</td>
-                <td class="text-center">{{ request.noOfParticipants }}</td>
-                <td>{{ formatDate(request.requestDate) }}</td>
-                <td>{{ request.requestedBy }}</td>
-                <td class="justification">
-                  <div class="justification-text" [title]="request.justification">
-                    {{ request.justification }}
-                  </div>
-                </td>
-              </tr>
+            <tr
+              *ngFor="let request of availableRequests"
+              [class.selected-row]="isRequestSelected(request.requestId)"
+              (click)="toggleRequestSelection(request.requestId)"
+            >
+              <td class="checkbox-column">
+                <input
+                  type="checkbox"
+                  [checked]="isRequestSelected(request.requestId)"
+                  (click)="$event.stopPropagation(); toggleRequestSelection(request.requestId)"
+                />
+              </td>
+              <td class="request-id">#{{ request.requestId }}</td>
+              <td>{{ request.tanNumber }}</td>
+              <td>{{ request.department }}</td>
+              <td class="text-center">{{ request.noOfParticipants }}</td>
+              <td>{{ formatDate(request.requestDate) }}</td>
+              <td>{{ request.requestedBy }}</td>
+              <td class="justification">
+                <div class="justification-text" [title]="request.justification">
+                  {{ request.justification }}
+                </div>
+              </td>
+            </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- Form Actions -->
+    <!--Form Actions - Different text for edit vs create -->
     <div class="form-actions">
-      <button 
-        type="submit" 
+      <button
+        type="submit"
         class="btn btn-primary"
-        [disabled]="isSubmitting"
+        [disabled]="isSubmitting || isLoading"
       >
-        {{ isSubmitting ? 'Creating Event...' : 'Create Event' }}
+        {{ isSubmitting ? (isEditMode ? 'Updating Event...' : 'Creating Event...') : (isEditMode ? 'Update Event' : 'Create Event') }}
       </button>
-      <button 
-        type="button" 
+      <button
+        type="button"
         class="btn btn-secondary"
         (click)="onReset()"
-        [disabled]="isSubmitting"
+        [disabled]="isSubmitting || isLoading"
       >
-        Reset
+        {{ isEditMode ? 'Reset to Original' : 'Reset' }}
+      </button>
+      <!-- Cancel button  -->
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="onCancel()"
+        [disabled]="isSubmitting || isLoading"
+      >
+        Cancel
       </button>
     </div>
   </form>
 </div>
-
