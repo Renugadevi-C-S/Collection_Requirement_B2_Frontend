@@ -24,9 +24,10 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   errorMessage: string = '';
 
-  // Modal properties
+  // Modal properties for detailed view
   showModal: boolean = false;
   selectedEvent: EventViewDetails | null = null;
+  isLoadingDetails: boolean = false;
 
   filters = {
     eventId: '',
@@ -39,7 +40,7 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
   constructor(
     private userService: UserService,
     private eventService: EventService,
-    private router: Router  // This is private, so can't use directly in template
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -57,7 +58,6 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ ADD THIS PUBLIC METHOD
   navigateToCreateEvent(): void {
     this.router.navigate(['/ldspoc-dashboard/create-event']);
   }
@@ -152,9 +152,28 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
     this.loadEvents();
   }
 
+  // Fetch full event details including linked requests
   viewEventDetails(event: EventViewDetails): void {
-    this.selectedEvent = event;
+    this.isLoadingDetails = true;
     this.showModal = true;
+    this.selectedEvent = null;
+
+    this.eventService.getEventById(event.eventId)
+      .pipe(
+        catchError(err => {
+          console.error('Error loading event details:', err);
+          alert('Failed to load event details. Please try again.');
+          this.isLoadingDetails = false;
+          this.showModal = false;
+          return of(null);
+        })
+      )
+      .subscribe(eventDetails => {
+        if (eventDetails) {
+          this.selectedEvent = eventDetails;
+        }
+        this.isLoadingDetails = false;
+      });
   }
 
   closeModal(): void {
@@ -162,12 +181,14 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
     this.selectedEvent = null;
   }
 
+  // Edit event - Navigate to edit page
   editEvent(eventId: number): void {
     this.router.navigate(['/ldspoc-dashboard/edit-event', eventId]);
   }
 
+  // Delete event with confirmation
   deleteEvent(eventId: number): void {
-    if (confirm('Are you sure you want to delete this event?')) {
+    if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
       this.eventService.deleteEvent(eventId)
         .pipe(
           catchError(err => {
@@ -179,9 +200,20 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
         .subscribe(response => {
           if (response) {
             alert(response.message);
-            this.loadEvents();
+            this.loadEvents(); // Refresh the list
           }
         });
     }
+  }
+
+  // Helper method to format date
+  formatDate(date: string | Date): string {
+    if (!date) return 'N/A';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   }
 }
