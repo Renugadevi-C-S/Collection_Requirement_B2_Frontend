@@ -44,6 +44,28 @@
   font-weight: 600;
 }
 
+/* Event ID info  */
+.event-id-info {
+  background-color: #e7f3ff;
+  color: var(--ford-blue, #1c3b6b);
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  border-left: 4px solid var(--ford-blue, #1c3b6b);
+  text-align: center;
+}
+
+/* Loading overlay */
+.loading-overlay {
+  text-align: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .error-alert {
   display: flex;
   justify-content: space-between;
@@ -121,11 +143,26 @@
   box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
 
+/* Readonly field styling  */
+.readonly-field {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  color: #666;
+}
+
 .error-message {
   display: block;
   color: #dc3545;
   font-size: 12px;
   margin-top: 4px;
+}
+
+/* Form text helper  */
+.form-text {
+  color: #666;
+  font-size: 0.85em;
+  margin-top: 4px;
+  display: block;
 }
 
 textarea.form-control {
