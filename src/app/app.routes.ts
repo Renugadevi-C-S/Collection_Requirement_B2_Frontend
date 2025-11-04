@@ -30,7 +30,8 @@ export const routes: Routes = [
       { path: 'submit-request', component: LdspocRequestFormComponent },
       { path: 'edit-request/:id', component: LdspocRequestFormComponent },
       { path: 'create-event', component: LdspocEventFormComponent },
-      { path: 'view-events', component: LdspocEventListComponent }
+      { path: 'view-events', component: LdspocEventListComponent },
+      { path: 'edit-event/:id', component: LdspocEventFormComponent } // Edit event route
     ]
   },
   { path: '**', redirectTo: '/login' }
