@@ -1,3 +1,5 @@
+import { BasicUserInfo } from "./basicUserInfo";
+
 export interface requestsViewDetails {
     requestId: number;
     requestedBy: string;
@@ -11,4 +13,5 @@ export interface requestsViewDetails {
     curriculum: string;
     approvedBy: string;
     approvalNotes: string;
+    requestedParticipants: BasicUserInfo[]
 }

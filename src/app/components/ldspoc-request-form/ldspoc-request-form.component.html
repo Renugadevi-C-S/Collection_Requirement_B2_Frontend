@@ -74,6 +74,130 @@
       </small>
     </div>
 
+    <!-- Participants Section -->
+    <div class="form-group">
+      <label>Add Participants <span class="required">*</span></label>
+      
+      <!-- Search Input -->
+      <div class="participant-search-wrapper">
+        <div class="search-input-container">
+          <i class="fa-solid fa-magnifying-glass search-icon-prefix"></i>
+          <input 
+            type="text"
+            [formControl]="searchControl"
+            placeholder="Search by name or CDSID..."
+            class="form-control search-input"
+            (focus)="onSearchFocus()"
+            (blur)="onSearchBlur()"
+            autocomplete="off"
+          />
+          <span class="search-hint" *ngIf="!searchControl.value">Start typing to search users</span>
+        </div>
+        
+        <!-- User Dropdown -->
+        <div 
+          class="user-dropdown" 
+          *ngIf="showUserDropdown && getAvailableUsers().length > 0"
+          (mouseenter)="onDropdownMouseEnter()"
+          (mouseleave)="onDropdownMouseLeave()"
+        >
+          <div class="dropdown-header">
+            <i class="fa-solid fa-users header-dropdown-icon"></i>
+            <span class="available-count">{{ getAvailableUsers().length }} user(s) available</span>
+          </div>
+          <div 
+            class="user-item" 
+            *ngFor="let user of getAvailableUsers()"
+            (mousedown)="onUserSelect($event, user)"
+          >
+            <div class="user-main-info">
+              <div class="user-name-cdsid">
+                <span class="user-display-name">{{ user.firstName }} {{ user.lastName }}</span>
+                <span class="user-cdsid-badge">({{ user.cdsId }})</span>
+              </div>
+              <span class="user-email">
+                <i class="fa-solid fa-envelope email-icon"></i>
+                {{ user.email }}
+              </span>
+            </div>
+            <i class="fa-solid fa-circle-plus add-icon"></i>
+          </div>
+        </div>
+
+        <!-- No Results -->
+        <div 
+          class="user-dropdown" 
+          *ngIf="showUserDropdown && searchControl.value && getAvailableUsers().length === 0"
+          (mouseenter)="onDropdownMouseEnter()"
+        >
+          <div class="no-results">
+            <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
+            <p>No users found</p>
+            <small *ngIf="filteredUsers.length > 0 && getAvailableUsers().length === 0">
+              All matching users have already been added
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected Participants List -->
+      <div class="selected-participants" *ngIf="selectedParticipants.length > 0">
+        <div class="participant-header">
+          <div class="header-left">
+            <i class="fa-solid fa-users header-icon"></i>
+            <span class="header-title">Selected Participants</span>
+            <span class="participant-count-badge">{{ selectedParticipants.length }}</span>
+          </div>
+          <span 
+            class="count-status" 
+            [class.count-valid]="validateParticipantCount()" 
+            [class.count-invalid]="!validateParticipantCount()"
+          >
+            <i class="fa-solid" [ngClass]="validateParticipantCount() ? 'fa-circle-check' : 'fa-circle-exclamation'"></i>
+            {{ getParticipantCountMessage() }}
+          </span>
+        </div>
+        <div class="participant-list">
+          <div class="participant-chip" *ngFor="let participant of selectedParticipants; let i = index">
+            <div class="participant-index">{{ i + 1 }}</div>
+            <div class="participant-details">
+              <span class="participant-name">
+                <i class="fa-solid fa-user participant-user-icon"></i>
+                {{ participant.firstName }} {{ participant.lastName }}
+                <span class="participant-cdsid-inline">({{ participant.cdsId }})</span>
+              </span>
+              <span class="participant-email">
+                <i class="fa-solid fa-envelope email-icon"></i>
+                {{ participant.email }}
+              </span>
+            </div>
+            <button 
+              type="button" 
+              class="remove-btn" 
+              (mousedown)="removeParticipant($event, participant.cdsId)"
+              title="Remove {{ participant.firstName }} {{ participant.lastName }}"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="selectedParticipants.length === 0">
+        <i class="fa-solid fa-user-plus empty-icon"></i>
+        <p class="empty-text">No participants added yet</p>
+        <small class="empty-subtext">Use the search box above to find and add participants</small>
+      </div>
+
+      <!-- Help Text -->
+      <small class="form-text">
+        <i class="fa-solid fa-circle-info"></i>
+        <strong>Tip:</strong> Search and select participants for this training request. 
+        The count must match the number of participants specified above.
+      </small>
+    </div>
+
     <div class="form-group">
       <label for="department">Department <span class="required">*</span></label>
       <select 
