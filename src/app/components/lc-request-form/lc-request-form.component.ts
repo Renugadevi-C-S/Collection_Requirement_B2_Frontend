@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { RequestService } from '../../services/request.service';
 import { requestDetails } from '../../model/requestDetails';
 import { LoginResponse } from '../../model/logInResponse';
+import { BasicUserInfo } from '../../model/basicUserInfo';
 import { Subscription, catchError, of } from 'rxjs';
 
 @Component({
@@ -22,6 +23,14 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
   private userSubscription?: Subscription;
   selectedFileName: string = 'No file selected';
   isSubmitting: boolean = false;
+
+  // Participant management
+  allUsers: BasicUserInfo[] = [];
+  filteredUsers: BasicUserInfo[] = [];
+  selectedParticipants: BasicUserInfo[] = [];
+  searchControl = new FormControl('');
+  showUserDropdown: boolean = false;
+  private blurTimeout: any;
 
   constructor(
     private fb: FormBuilder,
@@ -42,11 +51,157 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
       department: ['', Validators.required],
       curriculum: [null]
     });
+
+    // Load all users for participant selection
+    this.loadUsers();
+
+    // Setup search listener
+    this.searchControl.valueChanges.subscribe(searchTerm => {
+      this.filterUsers(searchTerm || '');
+      if (searchTerm && searchTerm.trim()) {
+        this.showUserDropdown = true;
+      }
+    });
   }
 
   ngOnDestroy(): void {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
+    }
+    if (this.blurTimeout) {
+      clearTimeout(this.blurTimeout);
+    }
+  }
+
+  loadUsers(): void {
+    this.userService.getAllUsersBasicInfo()
+      .pipe(
+        catchError(err => {
+          console.error('Error loading users:', err);
+          alert('Failed to load user list');
+          return of([]);
+        })
+      )
+      .subscribe(users => {
+        this.allUsers = users;
+        this.filteredUsers = users;
+        console.log('Loaded users:', users.length);
+      });
+  }
+
+  filterUsers(searchTerm: string): void {
+    if (!searchTerm.trim()) {
+      this.filteredUsers = this.allUsers;
+      return;
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    this.filteredUsers = this.allUsers.filter(user => 
+      user.firstName.toLowerCase().includes(term) ||
+      user.lastName.toLowerCase().includes(term) ||
+      user.cdsId.toLowerCase().includes(term) ||
+      user.email.toLowerCase().includes(term)
+    );
+  }
+
+  // Get available users (exclude already selected)
+  getAvailableUsers(): BasicUserInfo[] {
+    const selectedCdsIds = this.selectedParticipants.map(p => p.cdsId);
+    return this.filteredUsers.filter(user => !selectedCdsIds.includes(user.cdsId));
+  }
+
+  onSearchFocus(): void {
+    if (this.blurTimeout) {
+      clearTimeout(this.blurTimeout);
+    }
+    this.showUserDropdown = true;
+  }
+
+  onSearchBlur(): void {
+    // Delay closing to allow click events to fire
+    this.blurTimeout = setTimeout(() => {
+      this.showUserDropdown = false;
+    }, 300);
+  }
+
+  onDropdownMouseEnter(): void {
+    // Clear blur timeout when mouse enters dropdown
+    if (this.blurTimeout) {
+      clearTimeout(this.blurTimeout);
+    }
+  }
+
+  onDropdownMouseLeave(): void {
+    // Don't auto-close when mouse leaves
+  }
+
+  // Use mousedown event to add participant (fires before blur)
+  onUserSelect(event: MouseEvent, user: BasicUserInfo): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.addParticipant(user);
+  }
+
+  addParticipant(user: BasicUserInfo): void {
+    console.log('Adding participant:', user);
+    
+    // Check if user is already added
+    const isAlreadyAdded = this.selectedParticipants.some(p => p.cdsId === user.cdsId);
+    
+    if (isAlreadyAdded) {
+      alert(`${user.firstName} ${user.lastName} (${user.cdsId}) is already added to participants`);
+      return;
+    }
+
+    // Add to selected participants
+    this.selectedParticipants = [...this.selectedParticipants, user];
+    console.log('Selected participants:', this.selectedParticipants);
+    
+    // Clear search but keep dropdown open
+    this.searchControl.setValue('', { emitEvent: false });
+    this.filteredUsers = this.allUsers;
+    
+    // Keep dropdown open and refocus on input
+    this.showUserDropdown = true;
+    
+    // Optional: Show success message briefly
+    // You could implement a toast notification here
+  }
+
+  removeParticipant(event: MouseEvent, cdsId: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    console.log('Removing participant:', cdsId);
+    this.selectedParticipants = this.selectedParticipants.filter(p => p.cdsId !== cdsId);
+    console.log('Remaining participants:', this.selectedParticipants);
+  }
+
+  validateParticipantCount(): boolean {
+    const expectedCount = parseInt(this.requestForm.get('noOfParticipants')?.value);
+    const actualCount = this.selectedParticipants.length;
+    
+    if (isNaN(expectedCount) || expectedCount <= 0) {
+      return true;
+    }
+    
+    return expectedCount === actualCount;
+  }
+
+  getParticipantCountMessage(): string {
+    const expectedCount = parseInt(this.requestForm.get('noOfParticipants')?.value);
+    const actualCount = this.selectedParticipants.length;
+    
+    if (isNaN(expectedCount) || expectedCount <= 0) {
+      return '';
+    }
+    
+    if (actualCount < expectedCount) {
+      return `Please add ${expectedCount - actualCount} more participant(s)`;
+    } else if (actualCount > expectedCount) {
+      return `Please remove ${actualCount - expectedCount} participant(s)`;
+    } else {
+      return 'Participant count matches ✓';
     }
   }
 
@@ -66,7 +221,25 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.requestForm.valid && this.currentUser) {
+    if (!this.requestForm.valid) {
+      Object.keys(this.requestForm.controls).forEach(key => {
+        this.requestForm.controls[key].markAsTouched();
+      });
+      alert('Please fill in all required fields correctly.');
+      return;
+    }
+
+    if (!this.validateParticipantCount()) {
+      alert('Number of participants must match the number of selected users. ' + this.getParticipantCountMessage());
+      return;
+    }
+
+    if (this.selectedParticipants.length === 0) {
+      alert('Please add at least one participant to the request.');
+      return;
+    }
+
+    if (this.currentUser) {
       this.isSubmitting = true;
 
       const requestData: requestDetails = {
@@ -75,7 +248,8 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
         tanNo: this.requestForm.value.tanNo,
         noOfParticipants: parseInt(this.requestForm.value.noOfParticipants),
         department: this.requestForm.value.department,
-        curriculum: this.selectedFileName // Backend expects string - link of curriculam file
+        curriculum: this.selectedFileName,
+        usersCdsId: this.selectedParticipants.map(p => p.cdsId)
       };
 
       console.log('Submitting request:', requestData);
@@ -95,20 +269,19 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
             alert(response.message);
             this.requestForm.reset();
             this.selectedFileName = 'No file selected';
+            this.selectedParticipants = [];
+            this.searchControl.setValue('');
             this.router.navigate(['/lc-dashboard']);
           }
         });
-    } else {
-      Object.keys(this.requestForm.controls).forEach(key => {
-        this.requestForm.controls[key].markAsTouched();
-      });
-      alert('Please fill in all required fields correctly.');
     }
   }
 
   onReset(): void {
     this.requestForm.reset();
     this.selectedFileName = 'No file selected';
+    this.selectedParticipants = [];
+    this.searchControl.setValue('');
   }
 
   onBack(): void {

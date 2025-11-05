@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { user } from '../model/user'; 
 import { LoginDetails } from '../model/logInDetails';
 import { LoginResponse } from '../model/logInResponse';
+import { BasicUserInfo } from '../model/basicUserInfo';
 
 @Injectable({
   providedIn: 'root'
@@ -65,6 +66,10 @@ export class UserService {
     };
 
     return this.http.post<LoginResponse>(`${this.userURL}/login`, userLogin);
+  }
+
+  getAllUsersBasicInfo(): Observable<BasicUserInfo[]> {
+    return this.http.get<BasicUserInfo[]>(`${this.userURL}/all/basic-info`);
   }
 }
 
