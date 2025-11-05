@@ -218,7 +218,7 @@ export class LdspocRequestFormComponent implements OnInit, OnDestroy {
   }
 
   onCancel(): void {
-    this.router.navigate(['/ldspoc-dashboard']);
+    this.router.navigate(['/ldspoc-dashboard/request-list']);
   }
 
   isFieldInvalid(fieldName: string): boolean {

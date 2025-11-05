@@ -8,6 +8,7 @@ import { LdspocRequestFormComponent } from './components/ldspoc-request-form/lds
 import { LdspocEventFormComponent } from './components/ldspoc-event-form/ldspoc-event-form.component';
 import { LdspocEventListComponent } from './components/ldspoc-event-list/ldspoc-event-list.component';
 import { authGuard, roleGuard } from './guards/auth.guard';
+import { LdspocRequestsListComponent } from './components/ldspoc-requests-list/ldspoc-requests-list.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -28,6 +29,7 @@ export const routes: Routes = [
     data: { roles: ['LNDSPOC', 'ADMIN'] },
     children: [
       { path: 'submit-request', component: LdspocRequestFormComponent },
+      {path:'request-list',component:LdspocRequestsListComponent},
       { path: 'edit-request/:id', component: LdspocRequestFormComponent },
       { path: 'create-event', component: LdspocEventFormComponent },
       { path: 'view-events', component: LdspocEventListComponent },
