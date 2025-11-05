@@ -262,6 +262,12 @@ export class LdspocRequestFormComponent implements OnInit, OnDestroy {
     if (request.curriculum) {
       this.selectedFileName = request.curriculum;
     }
+
+    // Load participants if available
+    if (request.requestedParticipants && request.requestedParticipants.length > 0) {
+      this.selectedParticipants = [...request.requestedParticipants];
+      console.log('Loaded participants for edit:', this.selectedParticipants);
+    }
   }
 
   getDisplayRequestorId(): string {
