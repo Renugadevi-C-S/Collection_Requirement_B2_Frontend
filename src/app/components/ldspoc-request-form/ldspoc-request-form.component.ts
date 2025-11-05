@@ -182,7 +182,8 @@ export class LdspocRequestFormComponent implements OnInit, OnDestroy {
         tanNo: this.requestForm.value.tanNo,
         noOfParticipants: parseInt(this.requestForm.value.noOfParticipants),
         department: this.requestForm.value.department,
-        curriculum: this.selectedFileName
+        curriculum: this.selectedFileName,
+        usersCdsId: []
       };
 
       console.log('Creating new request with requestor ID:', this.currentUser!.cdsId);

@@ -4,5 +4,6 @@ export interface requestDetails{
     tanNo: string,
     noOfParticipants: number,
     department: string,
-    curriculum: any
+    curriculum: any,
+    usersCdsId: string[]
 }
