@@ -122,7 +122,9 @@
           class="form-control"
           [class.is-invalid]="isFieldInvalid('fundingSource')"
         >
+
           <option value="" disabled>Select Funding Source</option>
+          <option value="L&D Budget">L&D Budget</option>
           <option value="Company Budget">Company Budget</option>
           <option value="Department Budget">Department Budget</option>
           <option value="External Grant">External Grant</option>
@@ -144,8 +146,7 @@
         >
           <option value="Planned">Planned</option>
           <option value="In Progress">In Progress</option>
-          <option value="Completed">Completed</option>
-          <option value="Cancelled">Cancelled</option>
+
         </select>
         <small class="error-message" *ngIf="isFieldInvalid('status')">
           {{ getErrorMessage('status') }}
@@ -266,7 +267,7 @@
       >
         {{ isEditMode ? 'Reset to Original' : 'Reset' }}
       </button>
-      <!-- Cancel button  -->
+      <!-- Cancel button -->
       <button
         type="button"
         class="btn btn-secondary"
