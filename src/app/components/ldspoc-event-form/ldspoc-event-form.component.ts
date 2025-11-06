@@ -66,7 +66,7 @@ export class LdspocEventFormComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10)]],
       duration: ['', [Validators.required, Validators.min(1)]],
       eventType: ['', Validators.required],
-      fundingSource: ['', Validators.required],
+      fundingSource: ['L&D Budget', Validators.required], 
       status: ['Planned', Validators.required]
     });
   }
@@ -116,7 +116,7 @@ export class LdspocEventFormComponent implements OnInit {
       description: event.description || '',
       duration: event.duration || '',
       eventType: event.eventType || '',
-      fundingSource: event.fundingSource || '',
+      fundingSource: event.fundingSource || 'L&D Budget', // Default to 'L&D Budget' if not set
       status: event.status || 'Planned'
     });
   }
@@ -262,14 +262,12 @@ export class LdspocEventFormComponent implements OnInit {
     }
   }
 
-  // Reset logic for edit vs create mode
   onReset(): void {
     if (this.isEditMode) {
-      // Reload original event data
       this.loadEventData();
     } else {
-      // Reset to empty form
       this.eventForm.reset({
+        fundingSource: 'L&D Budget',
         status: 'Planned'
       });
       this.selectedRequests.clear();
