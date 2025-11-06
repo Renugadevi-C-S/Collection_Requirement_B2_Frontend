@@ -29,6 +29,14 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
   selectedEvent: EventViewDetails | null = null;
   isLoadingDetails: boolean = false;
 
+  showApprovalModal: boolean = false;
+  selectedEventForApproval: EventViewDetails | null = null;
+  approvalNotes: string = '';
+  isApprovalAction: boolean = true;
+  isSubmittingApproval: boolean = false;
+  submissionError: string = '';
+  showNotesError: boolean = false;
+
   filters = {
     eventId: '',
     eventName: '',
@@ -110,7 +118,12 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
       filtered = filtered.filter(evt =>
         evt.status.toLowerCase() === this.filters.status.toLowerCase()
       );
+    } else {
+      filtered = filtered.filter(evt =>
+        evt.status.toLowerCase() !== 'deleted'
+      );
     }
+
 
     if (this.filters.createdBy) {
       const term = this.filters.createdBy.toLowerCase();
@@ -142,7 +155,10 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
       case 'completed':
         return 'status-completed';
       case 'cancelled':
+      case 'rejected':
         return 'status-rejected';
+      case 'approved':
+        return 'status-approved';
       default:
         return 'status-default';
     }
@@ -204,6 +220,140 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
           }
         });
     }
+  }
+
+  // Complete Event - Opens completion modal
+  onCompleteEvent(event: EventViewDetails): void {
+    // Check if already completed
+    if (event.status.toLowerCase() === 'completed') {
+      return;
+    }
+
+    this.selectedEventForApproval = event;
+    this.isApprovalAction = true;
+    this.approvalNotes = '';
+    this.submissionError = '';
+    this.showNotesError = false;
+    this.showApprovalModal = true;
+  }
+
+  // Cancel Event - Opens cancellation modal
+  onCancelEvent(event: EventViewDetails): void {
+    // Check if already cancelled
+    if (event.status.toLowerCase() === 'cancelled') {
+      return;
+    }
+
+    this.selectedEventForApproval = event;
+    this.isApprovalAction = false;
+    this.approvalNotes = '';
+    this.submissionError = '';
+    this.showNotesError = false;
+    this.showApprovalModal = true;
+  }
+
+  // Close Approval/Rejection Modal
+  closeApprovalModal(): void {
+    if (!this.isSubmittingApproval) {
+      this.showApprovalModal = false;
+      this.selectedEventForApproval = null;
+      this.approvalNotes = '';
+      this.submissionError = '';
+      this.showNotesError = false;
+    }
+  }
+
+  // Submit Event Completion/Cancellation - Now stores notes and user info
+  submitEventApproval(): void {
+    // Validate notes
+    if (!this.approvalNotes || this.approvalNotes.trim().length < 10) {
+      this.showNotesError = true;
+      return;
+    }
+
+    if (!this.selectedEventForApproval || !this.currentUser) {
+      this.submissionError = 'Missing required information';
+      return;
+    }
+
+    this.showNotesError = false;
+    this.isSubmittingApproval = true;
+    this.submissionError = '';
+
+    const newStatus = this.isApprovalAction ? 'Completed' : 'Cancelled';
+
+    // Create event data object with completion/cancellation fields
+    const eventData: any = {
+      status: newStatus,
+      eventName: this.selectedEventForApproval.eventName,
+      description: this.selectedEventForApproval.description,
+      duration: this.selectedEventForApproval.duration,
+      eventType: this.selectedEventForApproval.eventType,
+      fundingSource: this.selectedEventForApproval.fundingSource,
+      createdBy: this.selectedEventForApproval.createdBy
+    };
+
+    // Add completion or cancellation fields based on action
+    if (this.isApprovalAction) {
+      // Completion fields
+      eventData.completedBy = this.currentUser.cdsId;
+      eventData.completionNotes = this.approvalNotes.trim();
+      eventData.completedDate = new Date().toISOString().split('T')[0]; // Current date in YYYY-MM-DD format
+    } else {
+      // Cancellation fields
+      eventData.cancelledBy = this.currentUser.cdsId;
+      eventData.cancellationNotes = this.approvalNotes.trim();
+      eventData.cancelledDate = new Date().toISOString().split('T')[0]; // Current date in YYYY-MM-DD format
+    }
+
+    this.eventService.updateEvent(this.selectedEventForApproval.eventId, eventData)
+      .pipe(
+        catchError(err => {
+          console.error('Error submitting event approval:', err);
+          this.submissionError = 'Failed to submit. Please try again.';
+          this.isSubmittingApproval = false;
+          return of(null);
+        })
+      )
+      .subscribe(response => {
+        if (response) {
+          // Update the event status in the local list
+          const eventIndex = this.events.findIndex(e => e.eventId === this.selectedEventForApproval?.eventId);
+          if (eventIndex !== -1) {
+            this.events[eventIndex].status = newStatus;
+
+            // Update local event with completion/cancellation data
+            if (this.isApprovalAction) {
+              this.events[eventIndex].completedBy = this.currentUser!.cdsId;
+              this.events[eventIndex].completionNotes = this.approvalNotes.trim();
+              this.events[eventIndex].completedDate = new Date().toISOString().split('T')[0];
+            } else {
+              this.events[eventIndex].cancelledBy = this.currentUser!.cdsId;
+              this.events[eventIndex].cancellationNotes = this.approvalNotes.trim();
+              this.events[eventIndex].cancelledDate = new Date().toISOString().split('T')[0];
+            }
+          }
+
+          const message = this.isApprovalAction
+            ? `Event "${this.selectedEventForApproval?.eventName}" has been completed.`
+            : `Event "${this.selectedEventForApproval?.eventName}" has been cancelled.`;
+
+          alert(message + `\n\nNotes: ${this.approvalNotes}`);
+
+          this.applyFilters();
+
+          // Close modal and reset
+          this.showApprovalModal = false;
+          this.selectedEventForApproval = null;
+          this.approvalNotes = '';
+          this.isSubmittingApproval = false;
+
+          // Refresh to ensure consistency
+          this.loadEvents();
+        } else {
+          this.isSubmittingApproval = false;
+        }
+      });
   }
 
   // Helper method to format date
