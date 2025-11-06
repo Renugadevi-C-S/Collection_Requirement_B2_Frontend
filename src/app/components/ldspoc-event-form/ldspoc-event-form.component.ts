@@ -66,7 +66,7 @@ export class LdspocEventFormComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10)]],
       duration: ['', [Validators.required, Validators.min(1)]],
       eventType: ['', Validators.required],
-      fundingSource: ['L&D Budget', Validators.required], 
+      fundingSource: ['L&D Budget', Validators.required],
       status: ['Planned', Validators.required]
     });
   }
