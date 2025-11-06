@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { OnInit, OnDestroy } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../services/user.service';
@@ -13,7 +13,7 @@ import { Subscription, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-ldspoc-requests-list',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, CommonModule, FormsModule],
+  imports: [RouterOutlet, CommonModule, FormsModule],
   templateUrl: './ldspoc-requests-list.component.html',
   styleUrl: './ldspoc-requests-list.component.css'
 })
@@ -114,7 +114,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
 
     // Filter by Request ID
     if (this.filters.requestId) {
-      filtered = filtered.filter(req => 
+      filtered = filtered.filter(req =>
         req.requestId.toString().includes(this.filters.requestId)
       );
     }
@@ -152,7 +152,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
 
     // Filter by Status
     if (this.filters.status) {
-      filtered = filtered.filter(req => 
+      filtered = filtered.filter(req =>
         req.requestStatus.toLowerCase() === this.filters.status.toLowerCase()
       );
     }
@@ -235,7 +235,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     if (request.requestStatus.toLowerCase() === 'approved') {
       return;
     }
-    
+
     this.selectedRequest = request;
     this.isApprovalAction = true;
     this.approvalNotes = '';
@@ -249,7 +249,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     if (request.requestStatus.toLowerCase() === 'rejected') {
       return;
     }
-    
+
     this.selectedRequest = request;
     this.isApprovalAction = false;
     this.approvalNotes = '';
@@ -308,15 +308,15 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
             this.requests[requestIndex].requestStatus = this.isApprovalAction ? 'Approved' : 'Rejected';
           }
           alert(response.message);
-          
+
           this.applyFilters();
-          
+
           // Close modal and reset
           this.showApprovalModal = false;
           this.selectedRequest = null;
           this.approvalNotes = '';
           this.isSubmittingApproval = false;
-          
+
           // Optionally reload all requests to ensure data consistency
           // this.loadRequests();
         } else {
