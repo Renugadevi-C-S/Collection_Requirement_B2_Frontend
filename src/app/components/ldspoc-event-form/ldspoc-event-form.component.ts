@@ -221,6 +221,8 @@ export class LdspocEventFormComponent implements OnInit {
         .pipe(
           catchError(err => {
             console.error('Event update error:', err);
+            console.error('Error status:', err.status);
+            console.error('Error message:', err.error);
             alert('Error updating event: ' + (err.error?.message || err.message));
             this.isSubmitting = false;
             return of(null);
