@@ -34,4 +34,8 @@ export class RequestService {
   getAllRequests(): Observable<requestsViewDetails[]> {
     return this.http.get<requestsViewDetails[]>(`${this.requestURL}/all`);
   }
+
+  deleteRequest(requestId: number): Observable<RequestSubmitResponse> {
+    return this.http.delete<RequestSubmitResponse>(`${this.requestURL}/${requestId}`);
+  }
 }

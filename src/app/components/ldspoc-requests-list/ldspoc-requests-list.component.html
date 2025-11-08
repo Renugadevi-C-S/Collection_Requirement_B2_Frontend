@@ -39,7 +39,7 @@
                     <table class="requests-table">
                         <thead>
                             <tr class="header-row">
-                                <th>Request ID</th>
+<!--                                <th>Request ID</th>-->
                                 <th>Event Name</th>
                                 <th>Department</th>
                                 <th>Participants</th>
@@ -50,15 +50,15 @@
                                 <th>Actions</th>
                             </tr>
                             <tr class="filter-row">
-                                <th>
-                                    <input
-                                        type="text"
-                                        [(ngModel)]="filters.requestId"
-                                        (input)="applyFilters()"
-                                        placeholder="Filter ID"
-                                        class="column-filter"
-                                    />
-                                </th>
+<!--                                <th>-->
+<!--                                    <input-->
+<!--                                        type="text"-->
+<!--                                        [(ngModel)]="filters.requestId"-->
+<!--                                        (input)="applyFilters()"-->
+<!--                                        placeholder="Filter ID"-->
+<!--                                        class="column-filter"-->
+<!--                                    />-->
+<!--                                </th>-->
                                 <th>
                                     <input
                                         type="text"
@@ -101,12 +101,12 @@
                                         (change)="applyFilters()"
                                         class="column-filter-select"
                                     >
-                                        <option value="">All Statuses</option>
-                                        <option value="pending">Pending</option>
+                                        <option value=""> </option>
                                         <option value="approved">Approved</option>
                                         <option value="rejected">Rejected</option>
-                                        <option value="in progress">In Progress</option>
+                                        <option value="linked">Linked</option>
                                         <option value="completed">Completed</option>
+                                        <option value="deleted">Deleted</option>
                                     </select>
                                 </th>
                                 <th>
@@ -140,7 +140,7 @@
                         </thead>
                         <tbody>
                             <tr *ngFor="let request of filteredRequests" class="request-row">
-                                <td class="request-id">{{ request.requestId }}</td>
+<!--                                <td class="request-id">{{ request.requestId }}</td>-->
                                 <td class="event-name">{{ request.eventName || 'N/A' }}</td>
                                 <td>{{ request.department }}</td>
                                 <td class="text-center">{{ request.noOfParticipants }}</td>
@@ -171,22 +171,52 @@
                                     >
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button
-                                        class="btn-action btn-accept"
-                                        (click)="onApproveRequest(request)"
-                                        [disabled]="request.requestStatus.toLowerCase() === 'approved'"
-                                        [title]="request.requestStatus.toLowerCase() === 'approved' ? 'Already Approved' : 'Approve Request'"
-                                    >
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <button
-                                        class="btn-action btn-reject"
-                                        (click)="onRejectRequest(request)"
-                                        [disabled]="request.requestStatus.toLowerCase() === 'rejected'"
-                                        [title]="request.requestStatus.toLowerCase() === 'rejected' ? 'Already Rejected' : 'Reject Request'"
-                                    >
-                                        <i class="fas fa-times"></i>
-                                    </button>
+<!--                                    <button-->
+<!--                                        class="btn-action btn-accept"-->
+<!--                                        (click)="onApproveRequest(request)"-->
+<!--                                        [disabled]="request.requestStatus.toLowerCase() === 'approved'"-->
+<!--                                        [title]="request.requestStatus.toLowerCase() === 'approved' ? 'Already Approved' : 'Approve Request'"-->
+<!--                                    >-->
+<!--                                        <i class="fas fa-check"></i>-->
+<!--                                    </button>-->
+<!--                                    <button-->
+<!--                                        class="btn-action btn-reject"-->
+<!--                                        (click)="onRejectRequest(request)"-->
+<!--                                        [disabled]="request.requestStatus.toLowerCase() === 'rejected'"-->
+<!--                                        [title]="request.requestStatus.toLowerCase() === 'rejected' ? 'Already Rejected' : 'Reject Request'"-->
+<!--                                    >-->
+<!--                                        <i class="fas fa-times"></i>-->
+<!--                                    </button>-->
+                                  <!-- Hide approve/reject buttons when status is "Deleted" -->
+                                  <!-- Disable approve/reject buttons when status is "Linked" -->
+                                  <button
+                                    *ngIf="request.requestStatus.toLowerCase() !== 'deleted'"
+                                    class="btn-action btn-accept"
+                                    (click)="onApproveRequest(request)"
+                                    [disabled]="request.requestStatus.toLowerCase() === 'approved' || request.requestStatus.toLowerCase() === 'linked'"
+                                    [title]="getApproveButtonTitle(request.requestStatus)"
+                                  >
+                                    <i class="fas fa-check"></i>
+                                  </button>
+                                  <button
+                                    *ngIf="request.requestStatus.toLowerCase() !== 'deleted'"
+                                    class="btn-action btn-reject"
+                                    (click)="onRejectRequest(request)"
+                                    [disabled]="request.requestStatus.toLowerCase() === 'rejected' || request.requestStatus.toLowerCase() === 'linked'"
+                                    [title]="getRejectButtonTitle(request.requestStatus)"
+                                  >
+                                    <i class="fas fa-times"></i>
+                                  </button>
+
+                                  <!-- Delete button (hidden when status is "Deleted") -->
+                                  <button
+                                    *ngIf="request.requestStatus.toLowerCase() !== 'deleted'"
+                                    class="btn-action btn-delete-grey"
+                                    (click)="deleteRequest(request.requestId)"
+                                    title="Delete Request"
+                                  >
+                                    <i class="fas fa-trash"></i>
+                                  </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -213,7 +243,7 @@
             <button class="btn-close" (click)="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <p>Request ID: <strong>#{{ selectedRequest?.requestId }}</strong></p>
+<!--            <p>Request ID: <strong>#{{ selectedRequest?.requestId }}</strong></p>-->
             <p>Requested By: <strong>{{ selectedRequest?.requestedBy }}</strong></p>
             <p>Department: <strong>{{ selectedRequest?.department }}</strong></p>
 
@@ -264,10 +294,10 @@
 
         <div class="modal-body" *ngIf="selectedViewRequest">
             <div class="detail-grid">
-                <div class="detail-item">
-                    <label>Request ID:</label>
-                    <span class="detail-value">{{ selectedViewRequest.requestId }}</span>
-                </div>
+<!--                <div class="detail-item">-->
+<!--                    <label>Request ID:</label>-->
+<!--                    <span class="detail-value">{{ selectedViewRequest.requestId }}</span>-->
+<!--                </div>-->
 
                 <div class="detail-item">
                     <label>Event Name:</label>
@@ -332,4 +362,5 @@
             <button class="btn-modal-close" (click)="closeViewModal()">Close</button>
         </div>
     </div>
-     </div>
+</div>
+</div>

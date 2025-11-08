@@ -112,12 +112,12 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     let filtered = [...this.requests];
 
-    // Filter by Request ID
-    if (this.filters.requestId) {
-      filtered = filtered.filter(req =>
-        req.requestId.toString().includes(this.filters.requestId)
-      );
-    }
+    // // Filter by Request ID
+    // if (this.filters.requestId) {
+    //   filtered = filtered.filter(req =>
+    //     req.requestId.toString().includes(this.filters.requestId)
+    //   );
+    // }
 
     // Filter by Event Name
     if (this.filters.eventName) {
@@ -150,10 +150,22 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Filter by Status
+    // // Filter by Status
+    // if (this.filters.status) {
+    //   filtered = filtered.filter(req =>
+    //     req.requestStatus.toLowerCase() === this.filters.status.toLowerCase()
+    //   );
+    // }
+
+    // Filter out "Deleted" status by default (unless explicitly selected)
     if (this.filters.status) {
       filtered = filtered.filter(req =>
         req.requestStatus.toLowerCase() === this.filters.status.toLowerCase()
+      );
+    } else {
+      // If no status filter selected, exclude "Deleted" requests by default
+      filtered = filtered.filter(req =>
+        req.requestStatus.toLowerCase() !== 'deleted'
       );
     }
 
@@ -192,15 +204,12 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
-      case 'pending':
-        return 'status-pending';
       case 'approved':
         return 'status-approved';
       case 'rejected':
         return 'status-rejected';
-      case 'in progress':
-      case 'inprogress':
-        return 'status-in-progress';
+      case 'linked':
+        return 'status-linked';
       case 'completed':
         return 'status-completed';
       default:
@@ -230,12 +239,60 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     this.router.navigate(['ldspoc-dashboard/edit-request', requestId]);
   }
 
+  // onApproveRequest(request: requestsViewDetails): void {
+  //   // Check if already approved
+  //   if (request.requestStatus.toLowerCase() === 'approved') {
+  //     return;
+  //   }
+  //
+  //   this.selectedRequest = request;
+  //   this.isApprovalAction = true;
+  //   this.approvalNotes = '';
+  //   this.submissionError = '';
+  //   this.showNotesError = false;
+  //   this.showApprovalModal = true;
+  // }
+  //
+  // onRejectRequest(request: requestsViewDetails): void {
+  //   // Check if already rejected
+  //   if (request.requestStatus.toLowerCase() === 'rejected') {
+  //     return;
+  //   }
+  //
+  //   this.selectedRequest = request;
+  //   this.isApprovalAction = false;
+  //   this.approvalNotes = '';
+  //   this.submissionError = '';
+  //   this.showNotesError = false;
+  //   this.showApprovalModal = true;
+  // }
+
+  // ✅ UPDATED: Show confirmation alert before opening approval modal
   onApproveRequest(request: requestsViewDetails): void {
     // Check if already approved
     if (request.requestStatus.toLowerCase() === 'approved') {
       return;
     }
 
+    // Check if linked - disabled
+    if (request.requestStatus.toLowerCase() === 'linked') {
+      return;
+    }
+
+    // ✅ NEW: Show confirmation alert
+    const confirmMessage =
+      '⚠️ APPROVAL CONFIRMATION\n\n' +
+      'Once you approve this request, this action CANNOT be undone.\n\n' +
+      'After approval:\n' +
+      '• The request status will be set to "Approved"\n' +
+      '• The reject button will be disabled for this request\n\n' +
+      'Do you want to proceed with approving this request?';
+
+    if (!confirm(confirmMessage)) {
+      return; // User clicked Cancel
+    }
+
+    // User clicked OK, proceed to open modal
     this.selectedRequest = request;
     this.isApprovalAction = true;
     this.approvalNotes = '';
@@ -247,6 +304,11 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
   onRejectRequest(request: requestsViewDetails): void {
     // Check if already rejected
     if (request.requestStatus.toLowerCase() === 'rejected') {
+      return;
+    }
+
+    // Check if linked - disabled
+    if (request.requestStatus.toLowerCase() === 'linked') {
       return;
     }
 
@@ -318,7 +380,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
           this.isSubmittingApproval = false;
 
           // Optionally reload all requests to ensure data consistency
-          // this.loadRequests();
+          this.loadRequests();
         } else {
           this.isSubmittingApproval = false;
         }
@@ -335,5 +397,51 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     this.showViewModal = false;
     this.selectedViewRequest = null;
   }
-}
 
+  // Delete request method
+  deleteRequest(requestId: number): void {
+    const confirmMessage =
+      '⚠️ DELETE CONFIRMATION\n\n' +
+      'Are you sure you want to delete this request?\n\n' +
+      'This action cannot be undone.';
+
+    if (confirm(confirmMessage)) {
+    this.requestService.deleteRequest(requestId)
+      .pipe(
+        catchError(err => {
+          console.error('Error deleting request:', err);
+          alert('Failed to delete request: ' + (err.error?.message || err.message));
+          return of(null);
+        })
+      )
+      .subscribe(response => {
+        if (response) {
+          alert(response.message);
+          this.loadRequests(); // Refresh the list
+        }
+      });
+  }
+  }
+
+  // Helper method to get approve button title
+  getApproveButtonTitle(status: string): string {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === 'approved') {
+      return 'Already Approved';
+    } else if (lowerStatus === 'linked') {
+      return 'Cannot approve linked request';
+    }
+    return 'Approve Request';
+  }
+
+  // Helper method to get reject button title
+  getRejectButtonTitle(status: string): string {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === 'rejected') {
+      return 'Already Rejected';
+    } else if (lowerStatus === 'linked') {
+      return 'Cannot reject linked request';
+    }
+    return 'Reject Request';
+  }
+}
