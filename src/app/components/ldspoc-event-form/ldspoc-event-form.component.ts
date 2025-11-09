@@ -131,7 +131,11 @@ export class LdspocEventFormComponent implements OnInit {
 
   loadApprovedRequests(): void {
     this.isLoadingRequests = true;
-    this.eventService.getAvailableRequestsForEvent()
+    const requestObservable = this.isEditMode && this.eventId
+      ? this.eventService.getAvailableRequestsForEventEdit(this.eventId)
+      : this.eventService.getAvailableRequestsForEvent();
+
+    requestObservable
       .pipe(
         catchError(err => {
           console.error('Error loading approved requests:', err);
