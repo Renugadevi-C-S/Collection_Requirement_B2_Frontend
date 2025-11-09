@@ -279,7 +279,6 @@
         </ng-container>
       </div>
 
-      <!-- Linked Requests Section shows "Completed" status -->
       <div *ngIf="selectedEvent.linkedRequests && selectedEvent.linkedRequests.length > 0" class="linked-requests-section">
         <h3 class="section-title">Linked Requests ({{ selectedEvent.linkedRequests.length }})</h3>
 
@@ -287,30 +286,30 @@
           <table class="linked-requests-table">
             <thead>
             <tr>
-              <th>TAN Number</th>
               <th>Department</th>
-              <th>Participants</th>
-              <th>Requested By</th>
-              <th>Status</th>
               <th>Justification</th>
+              <th>Participants</th>
+              <th>TAN Number</th>
+              <th>Status</th>
+              <th>Requested By</th>
             </tr>
             </thead>
             <tbody>
             <tr *ngFor="let request of selectedEvent.linkedRequests">
-              <td>{{ request.tanNo }}</td>
               <td>{{ request.department }}</td>
-              <td class="text-center">{{ request.noOfParticipants }}</td>
-              <td>{{ request.requestedBy }}</td>
-              <td>
-                <span [class]="'status-badge ' + getStatusClass(request.requestStatus)">
-                    {{ request.requestStatus }}
-                  </span>
-              </td>
               <td class="justification">
                 <div class="justification-text" [title]="request.justification">
                   {{ request.justification }}
                 </div>
               </td>
+              <td class="text-center">{{ request.noOfParticipants }}</td>
+              <td>{{ request.tanNo || 'N/A' }}</td>
+              <td>
+                <span [class]="'status-badge ' + getStatusClass(request.requestStatus)">
+                    {{ request.requestStatus }}
+                  </span>
+              </td>
+              <td>{{ request.requestedBy }}</td>
             </tr>
             </tbody>
           </table>
