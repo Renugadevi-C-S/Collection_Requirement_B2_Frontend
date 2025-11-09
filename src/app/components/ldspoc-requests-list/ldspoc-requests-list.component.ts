@@ -41,7 +41,6 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
   selectedViewRequest: requestsViewDetails | null = null;
 
   filters = {
-    requestId: '',
     eventName: '',
     department: '',
     participants: null as number | null,
@@ -112,13 +111,6 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     let filtered = [...this.requests];
 
-    // // Filter by Request ID
-    // if (this.filters.requestId) {
-    //   filtered = filtered.filter(req =>
-    //     req.requestId.toString().includes(this.filters.requestId)
-    //   );
-    // }
-
     // Filter by Event Name
     if (this.filters.eventName) {
       const term = this.filters.eventName.toLowerCase();
@@ -150,13 +142,6 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       );
     }
 
-    // // Filter by Status
-    // if (this.filters.status) {
-    //   filtered = filtered.filter(req =>
-    //     req.requestStatus.toLowerCase() === this.filters.status.toLowerCase()
-    //   );
-    // }
-
     // Filter out "Deleted" status by default (unless explicitly selected)
     if (this.filters.status) {
       filtered = filtered.filter(req =>
@@ -182,7 +167,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       const term = this.filters.requestedBy.toLowerCase();
       filtered = filtered.filter(req =>
         req.requestedBy?.toLowerCase() === term
-            );
+      );
     }
 
     this.filteredRequests = filtered;
@@ -190,7 +175,6 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
 
   clearFilters(): void {
     this.filters = {
-      requestId: '',
       eventName: '',
       department: '',
       participants: null,
@@ -239,35 +223,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     this.router.navigate(['ldspoc-dashboard/edit-request', requestId]);
   }
 
-  // onApproveRequest(request: requestsViewDetails): void {
-  //   // Check if already approved
-  //   if (request.requestStatus.toLowerCase() === 'approved') {
-  //     return;
-  //   }
-  //
-  //   this.selectedRequest = request;
-  //   this.isApprovalAction = true;
-  //   this.approvalNotes = '';
-  //   this.submissionError = '';
-  //   this.showNotesError = false;
-  //   this.showApprovalModal = true;
-  // }
-  //
-  // onRejectRequest(request: requestsViewDetails): void {
-  //   // Check if already rejected
-  //   if (request.requestStatus.toLowerCase() === 'rejected') {
-  //     return;
-  //   }
-  //
-  //   this.selectedRequest = request;
-  //   this.isApprovalAction = false;
-  //   this.approvalNotes = '';
-  //   this.submissionError = '';
-  //   this.showNotesError = false;
-  //   this.showApprovalModal = true;
-  // }
-
-  // ✅ UPDATED: Show confirmation alert before opening approval modal
+  // Show confirmation alert before opening approval modal
   onApproveRequest(request: requestsViewDetails): void {
     // Check if already approved
     if (request.requestStatus.toLowerCase() === 'approved') {
@@ -279,13 +235,13 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // ✅ NEW: Show confirmation alert
+    if (request.requestStatus.toLowerCase() === 'completed') {
+      return;
+    }
+
+    // Show confirmation alert
     const confirmMessage =
-      '⚠️ APPROVAL CONFIRMATION\n\n' +
       'Once you approve this request, this action CANNOT be undone.\n\n' +
-      'After approval:\n' +
-      '• The request status will be set to "Approved"\n' +
-      '• The reject button will be disabled for this request\n\n' +
       'Do you want to proceed with approving this request?';
 
     if (!confirm(confirmMessage)) {
@@ -309,6 +265,10 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
 
     // Check if linked - disabled
     if (request.requestStatus.toLowerCase() === 'linked') {
+      return;
+    }
+
+    if (request.requestStatus.toLowerCase() === 'completed') {
       return;
     }
 
@@ -388,7 +348,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
   }
 
 
-    viewRequestDetails(request: requestsViewDetails): void {
+  viewRequestDetails(request: requestsViewDetails): void {
     this.selectedViewRequest = request;
     this.showViewModal = true;
   }
@@ -398,29 +358,35 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     this.selectedViewRequest = null;
   }
 
-  // Delete request method
-  deleteRequest(requestId: number): void {
-    const confirmMessage =
-      '⚠️ DELETE CONFIRMATION\n\n' +
-      'Are you sure you want to delete this request?\n\n' +
-      'This action cannot be undone.';
-
-    if (confirm(confirmMessage)) {
-    this.requestService.deleteRequest(requestId)
-      .pipe(
-        catchError(err => {
-          console.error('Error deleting request:', err);
-          alert('Failed to delete request: ' + (err.error?.message || err.message));
-          return of(null);
-        })
-      )
-      .subscribe(response => {
-        if (response) {
-          alert(response.message);
-          this.loadRequests(); // Refresh the list
-        }
-      });
+  // Helper method to check if edit button should be disabled
+  isEditRequestDisabled(status: string): boolean {
+    const lowerStatus = status.toLowerCase();
+    return lowerStatus === 'approved' ||
+      lowerStatus === 'rejected' ||
+      lowerStatus === 'linked' ||
+      lowerStatus === 'completed';
   }
+
+  // Helper method to check if approve button should be disabled
+  isApproveButtonDisabled(status: string): boolean {
+    const lowerStatus = status.toLowerCase();
+    return lowerStatus === 'approved' ||
+      lowerStatus === 'linked' ||
+      lowerStatus === 'completed';
+  }
+
+  // Helper method to check if reject button should be disabled
+  isRejectButtonDisabled(status: string): boolean {
+    const lowerStatus = status.toLowerCase();
+    return lowerStatus === 'rejected' ||
+      lowerStatus === 'linked' ||
+      lowerStatus === 'completed';
+  }
+
+  // Helper method to check if delete button should be disabled
+  isDeleteButtonDisabled(status: string): boolean {
+    const lowerStatus = status.toLowerCase();
+    return lowerStatus === 'linked';
   }
 
   // Helper method to get approve button title
@@ -430,6 +396,8 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       return 'Already Approved';
     } else if (lowerStatus === 'linked') {
       return 'Cannot approve linked request';
+    } else if (lowerStatus === 'completed') {
+      return 'Cannot approve completed request';
     }
     return 'Approve Request';
   }
@@ -441,7 +409,56 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       return 'Already Rejected';
     } else if (lowerStatus === 'linked') {
       return 'Cannot reject linked request';
+    } else if (lowerStatus === 'completed') {
+      return 'Cannot reject completed request';
     }
     return 'Reject Request';
   }
+
+  // Helper method to get edit button title
+  getEditButtonTitle(status: string): string {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === 'approved') {
+      return 'Cannot edit approved request';
+    } else if (lowerStatus === 'rejected') {
+      return 'Cannot edit rejected request';
+    } else if (lowerStatus === 'linked') {
+      return 'Cannot edit linked request';
+    } else if (lowerStatus === 'completed') {
+      return 'Cannot edit completed request';
+    }
+    return 'Edit Request';
+  }
+
+  // Helper method to get delete button title
+  getDeleteButtonTitle(status: string): string {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === 'linked') {
+      return 'Cannot delete linked request';
+    } else if (lowerStatus === 'completed') {
+      return 'Cannot delete completed request';
+    }
+    return 'Delete Request';
+  }
+
+  // Delete request method
+  onDeleteRequest(requestId: number): void {
+    if (confirm('Are you sure you want to delete this request? This action cannot be undone.')) {
+      this.requestService.deleteRequest(requestId)
+        .pipe(
+          catchError(err => {
+            console.error('Error deleting request:', err);
+            alert('Failed to delete request: ' + (err.error?.message || err.message));
+            return of(null);
+          })
+        )
+        .subscribe(response => {
+          if (response) {
+            alert(response.message);
+            this.loadRequests(); // Refresh the list
+          }
+        });
+    }
+  }
 }
+
