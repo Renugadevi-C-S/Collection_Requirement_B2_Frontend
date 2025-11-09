@@ -50,4 +50,8 @@ export class EventService {
   getEventsByType(eventType: string): Observable<EventViewDetails[]> {
     return this.http.get<EventViewDetails[]>(`${this.baseUrl}/type/${eventType}`);
   }
+
+  getAvailableRequestsForEventEdit(eventId: number): Observable<AvailableRequest[]> {
+    return this.http.get<AvailableRequest[]>(`${this.baseUrl}/availableRequests/${eventId}`);
+  }
 }
