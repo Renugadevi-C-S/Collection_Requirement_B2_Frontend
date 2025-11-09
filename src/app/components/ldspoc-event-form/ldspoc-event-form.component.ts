@@ -116,7 +116,7 @@ export class LdspocEventFormComponent implements OnInit {
       description: event.description || '',
       duration: event.duration || '',
       eventType: event.eventType || '',
-      fundingSource: event.fundingSource || 'L&D Budget', // Default to 'L&D Budget' if not set
+      fundingSource: event.fundingSource || 'L&D Budget',
       status: event.status || 'Planned'
     });
   }
