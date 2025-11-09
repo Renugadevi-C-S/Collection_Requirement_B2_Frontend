@@ -189,11 +189,24 @@ export class LdspocEventFormComponent implements OnInit {
     this.calculatedParticipants = 0;
   }
 
+  hasSelectedRequests(): boolean {
+    return this.selectedRequests.size > 0;
+  }
+
+  isFormValid(): boolean {
+    return this.eventForm.valid && this.hasSelectedRequests();
+  }
+
   //Submit handles both CREATE and EDIT
   onSubmit(): void {
     if (this.eventForm.invalid) {
       this.markFormGroupTouched(this.eventForm);
       alert('Please fill in all required fields correctly.');
+      return;
+    }
+
+    if (!this.hasSelectedRequests()) {
+      alert('Please select at least one approved request to link with the event.');
       return;
     }
 
