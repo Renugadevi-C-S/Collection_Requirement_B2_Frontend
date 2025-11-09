@@ -154,10 +154,10 @@
       </div>
     </div>
 
-    <!-- Link Requests Section -->
+    <!-- Link Requests Section with Required indicator -->
     <div class="link-requests-section">
       <div class="section-header-toggle" (click)="toggleRequestsSection()">
-        <h3>Link Approved Requests </h3>
+        <h3>Link Approved Requests <span class="required">*</span></h3>
         <span class="toggle-icon">{{ showRequestsSection ? '▼' : '▶' }}</span>
       </div>
 
@@ -239,21 +239,27 @@
               </td>
               <td class="text-center">{{ request.noOfParticipants }}</td>
               <td>{{ request.department }}</td>
-              <!-- Show N/A if TAN Number is empty/null -->
               <td>{{ request.tanNumber || 'N/A' }}</td>
             </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Validation error message shown below the table -->
+        <div *ngIf="!hasSelectedRequests()" class="request-validation-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span>Please select at least one approved request to create/update the event.</span>
         </div>
       </div>
     </div>
 
     <!--Form Actions - Different text for edit vs create -->
     <div class="form-actions">
+      <!-- Button is disabled if no requests are selected -->
       <button
         type="submit"
         class="btn btn-primary"
-        [disabled]="isSubmitting || isLoading"
+        [disabled]="isSubmitting || isLoading || !isFormValid()"
       >
         {{ isSubmitting ? (isEditMode ? 'Updating Event...' : 'Creating Event...') : (isEditMode ? 'Update Event' : 'Create Event') }}
       </button>
