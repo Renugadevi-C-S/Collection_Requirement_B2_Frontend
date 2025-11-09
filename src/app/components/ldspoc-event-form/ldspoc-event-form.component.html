@@ -204,19 +204,17 @@
           <p>No approved requests available to link</p>
         </div>
 
-        <!-- Requests Table -->
         <div *ngIf="!isLoadingRequests && availableRequests.length > 0" class="requests-table-container">
           <table class="requests-table">
             <thead>
             <tr>
               <th class="checkbox-column">Select</th>
-              <th>Request ID</th>
-              <th>TAN Number</th>
-              <th>Department</th>
-              <th>Participants</th>
-              <th>Request Date</th>
               <th>Requested By</th>
+              <th>Request Date</th>
               <th>Justification</th>
+              <th>Participants</th>
+              <th>Department</th>
+              <th>TAN Number</th>
             </tr>
             </thead>
             <tbody>
@@ -232,17 +230,17 @@
                   (click)="$event.stopPropagation(); toggleRequestSelection(request.requestId)"
                 />
               </td>
-              <td class="request-id">#{{ request.requestId }}</td>
-              <td>{{ request.tanNumber }}</td>
-              <td>{{ request.department }}</td>
-              <td class="text-center">{{ request.noOfParticipants }}</td>
-              <td>{{ formatDate(request.requestDate) }}</td>
               <td>{{ request.requestedBy }}</td>
+              <td>{{ formatDate(request.requestDate) }}</td>
               <td class="justification">
                 <div class="justification-text" [title]="request.justification">
                   {{ request.justification }}
                 </div>
               </td>
+              <td class="text-center">{{ request.noOfParticipants }}</td>
+              <td>{{ request.department }}</td>
+              <!-- Show N/A if TAN Number is empty/null -->
+              <td>{{ request.tanNumber || 'N/A' }}</td>
             </tr>
             </tbody>
           </table>
