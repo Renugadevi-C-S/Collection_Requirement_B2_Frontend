@@ -5,6 +5,7 @@ import { requestDetails } from '../model/requestDetails';
 import { RequestSubmitResponse } from '../model/requestSubmitResponse';
 import { requestsViewDetails } from '../model/requestsViewDetails';
 import { requestUpdateDetails } from '../model/requestUpdateDetails';
+import { RequestStatistics } from '../model/RequestStatistics';
 
 @Injectable({
   providedIn: 'root'
@@ -37,5 +38,9 @@ export class RequestService {
 
   deleteRequest(requestId: number): Observable<RequestSubmitResponse> {
     return this.http.delete<RequestSubmitResponse>(`${this.requestURL}/${requestId}`);
+  }
+
+ getRequestStatistics(): Observable<RequestStatistics> {
+    return this.http.get<RequestStatistics>(`${this.requestURL}/statistics`);
   }
 }

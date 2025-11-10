@@ -5,6 +5,8 @@ import { AvailableRequest } from '../model/AvailableRequest';
 import { EventDetails } from '../model/eventDetails';
 import { EventViewDetails } from '../model/eventViewDetails';
 import { EventSubmitResponse } from '../model/eventSubmitResponse';
+import { EventStatistics } from '../model/EventStatistics';
+
 
 @Injectable({
   providedIn: 'root'
@@ -54,4 +56,9 @@ export class EventService {
   getAvailableRequestsForEventEdit(eventId: number): Observable<AvailableRequest[]> {
     return this.http.get<AvailableRequest[]>(`${this.baseUrl}/availableRequests/${eventId}`);
   }
+
+  getEventStatistics(): Observable<EventStatistics> {
+    return this.http.get<EventStatistics>(`${this.baseUrl}/statistics`);
+  }
+
 }

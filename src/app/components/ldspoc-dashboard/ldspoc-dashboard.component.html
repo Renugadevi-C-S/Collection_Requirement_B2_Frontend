@@ -1,20 +1,123 @@
 <div class="ldspoc-dashboard-container">
 
-    <nav class="nav-bar">
-        <a routerLink="/ldspoc-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
-        <a routerLink="/ldspoc-dashboard/request-list" routerLinkActive="active">Requests</a>
-        <a routerLink="/ldspoc-dashboard/view-events" routerLinkActive="active">Events</a>
-    </nav>
-     <div class="dashboard-header">
-        <div class="header-title">
-            <h1>L&D Dashboard</h1>
-            <p class="welcome-text">Welcome, {{ getUserDisplayName() }}!</p>
+  <nav class="nav-bar">
+    <a routerLink="/ldspoc-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
+    <a routerLink="/ldspoc-dashboard/request-list" routerLinkActive="active">Requests</a>
+    <a routerLink="/ldspoc-dashboard/view-events" routerLinkActive="active">Events</a>
+  </nav>
+
+  <div class="dashboard-header">
+    <div class="header-title">
+      <h1>L&D Dashboard</h1>
+      <p class="welcome-text">Welcome, {{ getUserDisplayName() }}!</p>
+    </div>
+  </div>
+
+  <div>
+    <router-outlet></router-outlet>
+  </div>
+
+  <div class="statistics-container">
+    <div class="statistics-section requests-section">
+      <div class="section-header">
+        <h2 class="section-title">REQUESTS</h2>
+      </div>
+
+      <div class="stats-grid">
+        <div class="total-card total-requests">
+          <div class="total-card-content">
+            <div class="card-label">Total Requests</div>
+            <div class="card-number">{{ requestStats?.total || 0 }}</div>
+          </div>
         </div>
-    </div>
-    <div>
-        <router-outlet></router-outlet>
+
+        <div class="status-cards-container">
+          <div class="status-cards-row">
+            <div class="status-card status-submitted">
+              <div class="card-label">Submitted</div>
+              <div class="card-number">{{ requestStats?.submitted || 0 }}</div>
+            </div>
+
+            <div class="status-card status-approved">
+              <div class="card-label">Approved</div>
+              <div class="card-number">{{ requestStats?.approved || 0 }}</div>
+            </div>
+
+            <div class="status-card status-rejected">
+              <div class="card-label">Rejected</div>
+              <div class="card-number">{{ requestStats?.rejected || 0 }}</div>
+            </div>
+          </div>
+
+          <div class="status-cards-row">
+            <div class="status-card status-linked">
+              <div class="card-label">Linked</div>
+              <div class="card-number">{{ requestStats?.linked || 0 }}</div>
+            </div>
+
+            <div class="status-card status-completed">
+              <div class="card-label">Completed</div>
+              <div class="card-number">{{ requestStats?.completed || 0 }}</div>
+            </div>
+
+            <div class="status-card status-deleted">
+              <div class="card-label">Deleted</div>
+              <div class="card-number">{{ requestStats?.deleted || 0 }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    
+    <!-- EVENTS Section -->
+    <div class="statistics-section events-section">
+      <div class="section-header">
+        <h2 class="section-title">EVENTS</h2>
+      </div>
+
+      <div class="stats-grid">
+        <div class="total-card total-events">
+          <div class="total-card-content">
+            <div class="card-label">Total Events</div>
+            <div class="card-number">{{ eventStats?.total || 0 }}</div>
+          </div>
+        </div>
+
+        <div class="status-cards-container">
+          <div class="status-cards-row">
+            <div class="status-card status-planned">
+              <div class="card-label">Planned</div>
+              <div class="card-number">{{ eventStats?.planned || 0 }}</div>
+            </div>
+
+            <div class="status-card status-in-progress">
+              <div class="card-label">In Progress</div>
+              <div class="card-number">{{ eventStats?.inProgress || 0 }}</div>
+            </div>
+
+            <div class="status-card status-event-completed">
+              <div class="card-label">Completed</div>
+              <div class="card-number">{{ eventStats?.completed || 0 }}</div>
+            </div>
+          </div>
+
+          <div class="status-cards-row">
+            <div class="status-card status-cancelled">
+              <div class="card-label">Cancelled</div>
+              <div class="card-number">{{ eventStats?.cancelled || 0 }}</div>
+            </div>
+
+            <div class="status-card status-event-deleted">
+              <div class="card-label">Deleted</div>
+              <div class="card-number">{{ eventStats?.deleted || 0 }}</div>
+            </div>
+
+            <div class="status-card-placeholder"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 </div>
-
