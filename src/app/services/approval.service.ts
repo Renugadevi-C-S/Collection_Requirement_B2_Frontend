@@ -17,7 +17,7 @@ export class ApprovalService {
 
   submitApproval(approvalDetails: NewApprovalDetails): Observable<ApprovalSummitResponse> {
     console.log('Submitting approval with details:', approvalDetails);
-    return this.http.post<ApprovalSummitResponse>(`${this.approvalURL}/newApproval`, approvalDetails);
+    return this.http.post<ApprovalSummitResponse>(`${this.approvalURL}/submit-approval`, approvalDetails);
   }
 
 }
