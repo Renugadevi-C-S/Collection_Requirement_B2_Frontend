@@ -234,17 +234,6 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Show confirmation message before opening modal
-    const confirmMessage =
-      'Once an event is marked as COMPLETED, it CANNOT be cancelled.\n\n' +
-      'All linked requests will be marked as "Completed"\n' +
-      'This action cannot be undone\n\n' +
-      'Do you want to proceed with completing this event?';
-
-    if (!confirm(confirmMessage)) {
-      return;
-    }
-
     this.selectedEventForApproval = event;
     this.isApprovalAction = true;
     this.approvalNotes = '';
@@ -268,18 +257,6 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
 
     // Check if event is deleted - cannot cancel a deleted event
     if (event.status.toLowerCase() === 'deleted') {
-      return;
-    }
-
-    // Show confirmation message before opening modal
-    const confirmMessage =
-      'Once an event is marked as CANCELLED, it CANNOT be completed.\n\n' +
-      ' All linked requests will be UNLINKED from this event\n' +
-      ' Request statuses will be changed back to "Approved"\n' +
-      ' This action cannot be undone\n\n' +
-      'Do you want to proceed with cancelling this event?';
-
-    if (!confirm(confirmMessage)) {
       return;
     }
 
