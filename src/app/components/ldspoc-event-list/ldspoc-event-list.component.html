@@ -23,11 +23,11 @@
     <p>Loading events...</p>
   </div>
 
-  <!-- No Events Message -->
-  <div *ngIf="!isLoading && filteredEvents.length === 0 && !errorMessage" class="no-events">
-    <p *ngIf="events.length === 0">No events found. Create your first training event!</p>
-    <p *ngIf="events.length > 0">No events match your filters.</p>
-  </div>
+<!--  &lt;!&ndash; No Events Message &ndash;&gt;-->
+<!--  <div *ngIf="!isLoading && filteredEvents.length === 0 && !errorMessage" class="no-events">-->
+<!--    <p *ngIf="events.length === 0">No events found. Create your first training event!</p>-->
+<!--    <p *ngIf="events.length > 0">No events match your filters.</p>-->
+<!--  </div>-->
 
   <!-- Events Table -->
   <div *ngIf="!isLoading && events.length > 0" class="table-container">
@@ -167,6 +167,12 @@
       </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- No Events Message -->
+  <div *ngIf="!isLoading && filteredEvents.length === 0 && !errorMessage" class="no-events">
+    <p *ngIf="events.length === 0">No events found. Create your first training event!</p>
+    <p *ngIf="events.length > 0">No events match your filters.</p>
   </div>
 
   <!-- Summary -->

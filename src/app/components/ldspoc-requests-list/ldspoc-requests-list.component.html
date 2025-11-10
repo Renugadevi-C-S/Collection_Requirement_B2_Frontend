@@ -28,11 +28,11 @@
           <p>Loading requests...</p>
         </div>
 
-        <!-- No Requests Message -->
-        <div *ngIf="!isLoading && filteredRequests.length === 0 && !errorMessage" class="no-requests">
-          <p *ngIf="requests.length === 0">No requests found.</p>
-          <p *ngIf="requests.length > 0">No requests match your filters.</p>
-        </div>
+<!--        &lt;!&ndash; No Requests Message &ndash;&gt;-->
+<!--        <div *ngIf="!isLoading && filteredRequests.length === 0 && !errorMessage" class="no-requests">-->
+<!--          <p *ngIf="requests.length === 0">No requests found.</p>-->
+<!--          <p *ngIf="requests.length > 0">No requests match your filters.</p>-->
+<!--        </div>-->
 
         <!-- Requests Table -->
         <div *ngIf="!isLoading && requests.length > 0" class="table-container">
@@ -41,7 +41,7 @@
             <tr class="header-row">
               <th>Event Name</th>
               <th>Department</th>
-              <th>Participants</th>
+<!--              <th>Participants</th>-->
               <th>Request Date</th>
               <th>Status</th>
               <th>Justification</th>
@@ -67,15 +67,15 @@
                   class="column-filter"
                 />
               </th>
-              <th>
-                <input
-                  type="number"
-                  [(ngModel)]="filters.participants"
-                  (input)="applyFilters()"
-                  placeholder="Filter #"
-                  class="column-filter"
-                />
-              </th>
+<!--              <th>-->
+<!--                <input-->
+<!--                  type="number"-->
+<!--                  [(ngModel)]="filters.participants"-->
+<!--                  (input)="applyFilters()"-->
+<!--                  placeholder="Filter #"-->
+<!--                  class="column-filter"-->
+<!--                />-->
+<!--              </th>-->
               <th>
                 <input
                   type="text"
@@ -132,7 +132,7 @@
             <tr *ngFor="let request of filteredRequests" class="request-row">
               <td class="event-name">{{ request.eventName || 'N/A' }}</td>
               <td>{{ request.department }}</td>
-              <td class="text-center">{{ request.noOfParticipants }}</td>
+<!--              <td class="text-center">{{ request.noOfParticipants }}</td>-->
               <td>{{ formatDate(request.requestDate) }}</td>
               <td>
                                     <span [class]="'status-badge ' + getStatusClass(request.requestStatus)">
@@ -202,6 +202,12 @@
             </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- No Requests Message -->
+        <div *ngIf="!isLoading && filteredRequests.length === 0 && !errorMessage" class="no-requests">
+          <p *ngIf="requests.length === 0">No requests found.</p>
+          <p *ngIf="requests.length > 0">No requests match your filters.</p>
         </div>
 
         <!-- Summary -->
@@ -289,10 +295,10 @@
             <span class="detail-value">{{ selectedViewRequest.department }}</span>
           </div>
 
-          <div class="detail-item">
-            <label>Number of Participants:</label>
-            <span class="detail-value">{{ selectedViewRequest.noOfParticipants }}</span>
-          </div>
+<!--          <div class="detail-item">-->
+<!--            <label>Number of Participants:</label>-->
+<!--            <span class="detail-value">{{ selectedViewRequest.noOfParticipants }}</span>-->
+<!--          </div>-->
 
           <div class="detail-item">
             <label>Request Date:</label>

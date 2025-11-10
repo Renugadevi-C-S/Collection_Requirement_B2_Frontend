@@ -1,4 +1,4 @@
-<div class="requests-list-page"> <!-- ✅ New wrapper for separate page -->
+<div class="requests-list-page">
 
   <div class="page-header">
     <h2>My Training Requests</h2>
@@ -22,12 +22,6 @@
   <div *ngIf="isLoading" class="loading-container">
     <div class="spinner"></div>
     <p>Loading requests...</p>
-  </div>
-
-  <!-- No Requests Message -->
-  <div *ngIf="!isLoading && filteredRequests.length === 0 && !errorMessage" class="no-requests">
-    <p *ngIf="requests.length === 0">No requests found. Submit your first training request!</p>
-    <p *ngIf="requests.length > 0">No requests match your filters.</p>
   </div>
 
   <!-- Requests Table -->
@@ -142,6 +136,12 @@
       </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- No Requests Message -->
+  <div *ngIf="!isLoading && filteredRequests.length === 0 && !errorMessage" class="no-requests">
+    <p *ngIf="requests.length === 0">No requests found. Submit your first training request!</p>
+    <p *ngIf="requests.length > 0">No requests match your filters.</p>
   </div>
 
   <!-- Summary -->
