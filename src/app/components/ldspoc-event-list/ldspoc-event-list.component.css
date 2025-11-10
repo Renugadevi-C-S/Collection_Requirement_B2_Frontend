@@ -316,12 +316,6 @@
 }
 
 .status-in-progress {
-  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-  color: #ffffff;
-}
-
-/* In Progress - Bluish-green gradient */
-.status-in-progress {
   background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
   color: #ffffff;
 }
