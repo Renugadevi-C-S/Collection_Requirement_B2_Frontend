@@ -116,10 +116,11 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
 
     // Filter by Request Date
     if (this.filters.requestDate) {
-      const term = this.filters.requestDate.toLowerCase();
-      filtered = filtered.filter(req =>
-        this.formatDate(req.requestDate).toLowerCase().includes(term)
-      );
+      filtered = filtered.filter(req => {
+        const reqDate = new Date(req.requestDate);
+        const filterDate = new Date(this.filters.requestDate);
+        return reqDate.toDateString() === filterDate.toDateString();
+      });
     }
 
     // Filter out "Deleted" status by default (unless explicitly selected)

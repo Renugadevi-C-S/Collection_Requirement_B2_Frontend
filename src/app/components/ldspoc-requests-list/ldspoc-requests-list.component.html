@@ -78,11 +78,11 @@
 <!--              </th>-->
               <th>
                 <input
-                  type="text"
+                  type="date"
                   [(ngModel)]="filters.requestDate"
-                  (input)="applyFilters()"
+                  (change)="applyFilters()"
                   placeholder="Filter date"
-                  class="column-filter"
+                  class="column-filter column-filter-date"
                 />
               </th>
               <th>

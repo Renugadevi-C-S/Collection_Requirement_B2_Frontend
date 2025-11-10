@@ -379,6 +379,16 @@ body {
   appearance: none;
 }
 
+/* Date input specific styling */
+.column-filter-date {
+  cursor: pointer;
+  padding-right: 8px;
+}
+
+.column-filter-date::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
 /* Clear Filter Button */
 .btn-clear-filter {
   background-color: var(--ford-blue, #1c3b6b);
