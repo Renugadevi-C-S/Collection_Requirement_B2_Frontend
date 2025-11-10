@@ -192,8 +192,8 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
         return 'status-approved';
       case 'rejected':
         return 'status-rejected';
-      case 'linked':
-        return 'status-linked';
+      case 'in-progress':
+        return 'status-in-progress';
       case 'completed':
         return 'status-completed';
       default:
@@ -230,8 +230,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Check if linked - disabled
-    if (request.requestStatus.toLowerCase() === 'linked') {
+    if (request.requestStatus.toLowerCase() === 'in-progress') {
       return;
     }
 
@@ -263,8 +262,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Check if linked - disabled
-    if (request.requestStatus.toLowerCase() === 'linked') {
+    if (request.requestStatus.toLowerCase() === 'in-progress') {
       return;
     }
 
@@ -363,7 +361,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     const lowerStatus = status.toLowerCase();
     return lowerStatus === 'approved' ||
       lowerStatus === 'rejected' ||
-      lowerStatus === 'linked' ||
+      lowerStatus === 'in-progress' ||
       lowerStatus === 'completed';
   }
 
@@ -371,7 +369,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
   isApproveButtonDisabled(status: string): boolean {
     const lowerStatus = status.toLowerCase();
     return lowerStatus === 'approved' ||
-      lowerStatus === 'linked' ||
+      lowerStatus === 'in-progress' ||
       lowerStatus === 'completed';
   }
 
@@ -379,14 +377,14 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
   isRejectButtonDisabled(status: string): boolean {
     const lowerStatus = status.toLowerCase();
     return lowerStatus === 'rejected' ||
-      lowerStatus === 'linked' ||
+      lowerStatus === 'in-progress' ||
       lowerStatus === 'completed';
   }
 
   // Helper method to check if delete button should be disabled
   isDeleteButtonDisabled(status: string): boolean {
     const lowerStatus = status.toLowerCase();
-    return lowerStatus === 'linked';
+    return lowerStatus === 'in-progress';
   }
 
   // Helper method to get approve button title
@@ -394,8 +392,8 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     const lowerStatus = status.toLowerCase();
     if (lowerStatus === 'approved') {
       return 'Already Approved';
-    } else if (lowerStatus === 'linked') {
-      return 'Cannot approve linked request';
+    } else if (lowerStatus === 'in-progress') {
+      return 'Cannot approve in-progress request';
     } else if (lowerStatus === 'completed') {
       return 'Cannot approve completed request';
     }
@@ -407,8 +405,8 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     const lowerStatus = status.toLowerCase();
     if (lowerStatus === 'rejected') {
       return 'Already Rejected';
-    } else if (lowerStatus === 'linked') {
-      return 'Cannot reject linked request';
+    } else if (lowerStatus === 'in-progress') {
+      return 'Cannot reject in-progress request';
     } else if (lowerStatus === 'completed') {
       return 'Cannot reject completed request';
     }
@@ -422,8 +420,8 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       return 'Cannot edit approved request';
     } else if (lowerStatus === 'rejected') {
       return 'Cannot edit rejected request';
-    } else if (lowerStatus === 'linked') {
-      return 'Cannot edit linked request';
+    } else if (lowerStatus === 'in-progress') {
+      return 'Cannot edit in-progress request';
     } else if (lowerStatus === 'completed') {
       return 'Cannot edit completed request';
     }
@@ -433,8 +431,8 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
   // Helper method to get delete button title
   getDeleteButtonTitle(status: string): string {
     const lowerStatus = status.toLowerCase();
-    if (lowerStatus === 'linked') {
-      return 'Cannot delete linked request';
+    if (lowerStatus === 'in-progress') {
+      return 'Cannot delete in-progress request';
     } else if (lowerStatus === 'completed') {
       return 'Cannot delete completed request';
     }

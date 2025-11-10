@@ -1281,7 +1281,7 @@ body {
   background: linear-gradient(135deg, #dc3545 0%, #c82333 50%, #bd2130 100%);
 }
 
-.status-linked {
+.status-in-progress {
   background: linear-gradient(135deg, #fd7e14 0%, #ff6b35 50%, #e8590c 100%);
 }
 

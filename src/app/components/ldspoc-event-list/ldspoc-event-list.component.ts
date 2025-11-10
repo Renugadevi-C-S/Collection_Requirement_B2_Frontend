@@ -138,7 +138,6 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-  // Updated getStatusClass to include "linked" status
   getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
       case 'planned':
@@ -152,8 +151,8 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
         return 'status-rejected';
       case 'approved':
         return 'status-approved';
-      case 'linked':
-        return 'status-linked';
+      case 'in-progress':
+        return 'status-in-progress';
       default:
         return 'status-default';
     }

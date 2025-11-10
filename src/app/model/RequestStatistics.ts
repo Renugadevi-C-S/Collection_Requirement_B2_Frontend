@@ -3,7 +3,7 @@ export interface RequestStatistics {
   submitted: number;
   approved: number;
   rejected: number;
-  linked: number;
+  inProgress: number;
   completed: number;
   deleted: number;
 }

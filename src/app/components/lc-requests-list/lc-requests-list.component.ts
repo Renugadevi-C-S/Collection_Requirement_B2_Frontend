@@ -122,13 +122,6 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
       );
     }
 
-    // // Filter by Status
-    // if (this.filters.status) {
-    //   filtered = filtered.filter(req =>
-    //     req.requestStatus.toLowerCase() === this.filters.status.toLowerCase()
-    //   );
-    // }
-
     // Filter out "Deleted" status by default (unless explicitly selected)
     if (this.filters.status) {
       filtered = filtered.filter(req =>
@@ -171,8 +164,8 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
         return 'status-approved';
       case 'rejected':
         return 'status-rejected';
-      case 'linked':
-        return 'status-linked';
+      case 'in-progress':
+        return 'status-in-progress';
       case 'completed':
         return 'status-completed';
       default:
