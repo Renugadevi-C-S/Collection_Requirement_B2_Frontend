@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { OnInit, OnDestroy } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../services/user.service';
@@ -13,7 +13,7 @@ import { Subscription, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-ldspoc-requests-list',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, CommonModule, FormsModule],
+  imports: [RouterOutlet, CommonModule, FormsModule],
   templateUrl: './ldspoc-requests-list.component.html',
   styleUrl: './ldspoc-requests-list.component.css'
 })
@@ -119,7 +119,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
 
     // Filter by Request ID
     if (this.filters.requestId) {
-      filtered = filtered.filter(req => 
+      filtered = filtered.filter(req =>
         req.requestId.toString().includes(this.filters.requestId)
       );
     }
@@ -155,10 +155,15 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Filter by Status
+    // Filter out "Deleted" status by default (unless explicitly selected)
     if (this.filters.status) {
-      filtered = filtered.filter(req => 
+      filtered = filtered.filter(req =>
         req.requestStatus.toLowerCase() === this.filters.status.toLowerCase()
+      );
+    } else {
+      // If no status filter selected, exclude "Deleted" requests by default
+      filtered = filtered.filter(req =>
+        req.requestStatus.toLowerCase() !== 'deleted'
       );
     }
 
@@ -175,7 +180,7 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
       const term = this.filters.requestedBy.toLowerCase();
       filtered = filtered.filter(req =>
         req.requestedBy?.toLowerCase() === term
-            );
+      );
     }
 
     this.filteredRequests = filtered;
@@ -197,14 +202,11 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
-      case 'pending':
-        return 'status-pending';
       case 'approved':
         return 'status-approved';
       case 'rejected':
         return 'status-rejected';
-      case 'in progress':
-      case 'inprogress':
+      case 'in-progress':
         return 'status-in-progress';
       case 'completed':
         return 'status-completed';
@@ -235,12 +237,22 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     this.router.navigate(['ldspoc-dashboard/edit-request', requestId]);
   }
 
+  // Open approval modal
   onApproveRequest(request: requestsViewDetails): void {
     // Check if already approved
     if (request.requestStatus.toLowerCase() === 'approved') {
       return;
     }
-    
+
+    if (request.requestStatus.toLowerCase() === 'in-progress') {
+      return;
+    }
+
+    if (request.requestStatus.toLowerCase() === 'completed') {
+      return;
+    }
+
+    // Open modal directly
     this.selectedRequest = request;
     this.isApprovalAction = true;
     this.approvalNotes = '';
@@ -254,7 +266,15 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
     if (request.requestStatus.toLowerCase() === 'rejected') {
       return;
     }
-    
+
+    if (request.requestStatus.toLowerCase() === 'in-progress') {
+      return;
+    }
+
+    if (request.requestStatus.toLowerCase() === 'completed') {
+      return;
+    }
+
     this.selectedRequest = request;
     this.isApprovalAction = false;
     this.approvalNotes = '';
@@ -306,33 +326,35 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe((response: any) => {
-        if (response.exception != null) {
+        if (response && response.exception != null) {
           alert(response.message);
           this.isSubmittingApproval = false;
+        } else if (response) {
+          // Update the request status in the local list
+          const requestIndex = this.requests.findIndex(r => r.requestId === this.selectedRequest?.requestId);
+          if (requestIndex !== -1) {
+            this.requests[requestIndex].requestStatus = this.isApprovalAction ? 'Approved' : 'Rejected';
+          }
+          alert(response.message);
 
+          this.applyFilters();
+
+          // Close modal and reset
+          this.showApprovalModal = false;
+          this.selectedRequest = null;
+          this.approvalNotes = '';
+          this.isSubmittingApproval = false;
+
+          // Optionally reload all requests to ensure data consistency
+          this.loadRequests();
         } else {
-            // Update the request status in the local list
-            const requestIndex = this.requests.findIndex(r => r.requestId === this.selectedRequest?.requestId);
-            if (requestIndex !== -1) {
-              this.requests[requestIndex].requestStatus = this.isApprovalAction ? 'Approved' : 'Rejected';
-            }
-            alert(response.message);
-            
-            this.applyFilters();
-            
-            // Close modal and reset
-            this.showApprovalModal = false;
-            this.selectedRequest = null;
-            this.approvalNotes = '';
-            this.isSubmittingApproval = false;
-            
-            // Optionally reload all requests to ensure data consistency
-            this.loadRequests();
+          this.isSubmittingApproval = false;
         }
       });
   }
 
-    viewRequestDetails(request: requestsViewDetails): void {
+
+  viewRequestDetails(request: requestsViewDetails): void {
     this.selectedViewRequest = request;
     this.showViewModal = true;
   }
@@ -340,6 +362,106 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
   closeViewModal(): void {
     this.showViewModal = false;
     this.selectedViewRequest = null;
+  }
+
+  // Helper method to check if edit button should be disabled
+  isEditRequestDisabled(status: string): boolean {
+    const lowerStatus = status.toLowerCase();
+    return lowerStatus === 'approved' ||
+      lowerStatus === 'in-progress' ||
+      lowerStatus === 'completed';
+  }
+
+  // Helper method to check if approve button should be disabled
+  isApproveButtonDisabled(status: string): boolean {
+    const lowerStatus = status.toLowerCase();
+    return lowerStatus === 'approved' ||
+      lowerStatus === 'in-progress' ||
+      lowerStatus === 'completed';
+  }
+
+  // Helper method to check if reject button should be disabled
+  isRejectButtonDisabled(status: string): boolean {
+    const lowerStatus = status.toLowerCase();
+    return lowerStatus === 'rejected' ||
+      lowerStatus === 'in-progress' ||
+      lowerStatus === 'completed';
+  }
+
+  // Helper method to check if delete button should be disabled
+  isDeleteButtonDisabled(status: string): boolean {
+    const lowerStatus = status.toLowerCase();
+    return lowerStatus === 'in-progress';
+  }
+
+  // Helper method to get approve button title
+  getApproveButtonTitle(status: string): string {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === 'approved') {
+      return 'Already Approved';
+    } else if (lowerStatus === 'in-progress') {
+      return 'Cannot approve in-progress request';
+    } else if (lowerStatus === 'completed') {
+      return 'Cannot approve completed request';
+    }
+    return 'Approve Request';
+  }
+
+  // Helper method to get reject button title
+  getRejectButtonTitle(status: string): string {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === 'rejected') {
+      return 'Already Rejected';
+    } else if (lowerStatus === 'in-progress') {
+      return 'Cannot reject in-progress request';
+    } else if (lowerStatus === 'completed') {
+      return 'Cannot reject completed request';
+    }
+    return 'Reject Request';
+  }
+
+  // Helper method to get edit button title
+  getEditButtonTitle(status: string): string {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === 'approved') {
+      return 'Cannot edit approved request';
+    } else if (lowerStatus === 'in-progress') {
+      return 'Cannot edit in-progress request';
+    } else if (lowerStatus === 'completed') {
+      return 'Cannot edit completed request';
+    }
+    return 'Edit Request';
+  }
+
+  // Helper method to get delete button title
+  getDeleteButtonTitle(status: string): string {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === 'in-progress') {
+      return 'Cannot delete in-progress request';
+    } else if (lowerStatus === 'completed') {
+      return 'Cannot delete completed request';
+    }
+    return 'Delete Request';
+  }
+
+  // Delete request method
+  onDeleteRequest(requestId: number): void {
+    if (confirm('Are you sure you want to delete this request? This action cannot be undone.')) {
+      this.requestService.deleteRequest(requestId)
+        .pipe(
+          catchError(err => {
+            console.error('Error deleting request:', err);
+            alert('Failed to delete request: ' + (err.error?.message || err.message));
+            return of(null);
+          })
+        )
+        .subscribe(response => {
+          if (response) {
+            alert(response.message);
+            this.loadRequests(); // Refresh the list
+          }
+        });
+    }
   }
 }
 

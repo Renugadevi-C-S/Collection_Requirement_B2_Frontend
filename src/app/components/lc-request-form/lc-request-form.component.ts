@@ -46,7 +46,7 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
 
     this.requestForm = this.fb.group({
       justification: ['', [Validators.required, Validators.minLength(10)]],
-      tanNo: ['', [Validators.required, Validators.pattern(/^[A-Z0-9-]+$/)]],
+      tanNo: ['', [Validators.pattern(/^[A-Z0-9-]+$/)]],
       noOfParticipants: ['', [Validators.required, Validators.min(1), Validators.max(1000)]],
       department: ['', Validators.required],
       curriculum: [null]
@@ -101,7 +101,7 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
     }
 
     const term = searchTerm.toLowerCase().trim();
-    this.filteredUsers = this.allUsers.filter(user => 
+    this.filteredUsers = this.allUsers.filter(user =>
       user.firstName.toLowerCase().includes(term) ||
       user.lastName.toLowerCase().includes(term) ||
       user.cdsId.toLowerCase().includes(term) ||
@@ -149,34 +149,28 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
 
   addParticipant(user: BasicUserInfo): void {
     console.log('Adding participant:', user);
-    
-    // Check if user is already added
+
     const isAlreadyAdded = this.selectedParticipants.some(p => p.cdsId === user.cdsId);
-    
+
     if (isAlreadyAdded) {
       alert(`${user.firstName} ${user.lastName} (${user.cdsId}) is already added to participants`);
       return;
     }
 
-    // Add to selected participants
     this.selectedParticipants = [...this.selectedParticipants, user];
     console.log('Selected participants:', this.selectedParticipants);
-    
-    // Clear search but keep dropdown open
+
     this.searchControl.setValue('', { emitEvent: false });
     this.filteredUsers = this.allUsers;
-    
-    // Keep dropdown open and refocus on input
+
     this.showUserDropdown = true;
-    
-    // Optional: Show success message briefly
-    // You could implement a toast notification here
+
   }
 
   removeParticipant(event: MouseEvent, cdsId: string): void {
     event.preventDefault();
     event.stopPropagation();
-    
+
     console.log('Removing participant:', cdsId);
     this.selectedParticipants = this.selectedParticipants.filter(p => p.cdsId !== cdsId);
     console.log('Remaining participants:', this.selectedParticipants);
@@ -185,22 +179,22 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
   validateParticipantCount(): boolean {
     const expectedCount = parseInt(this.requestForm.get('noOfParticipants')?.value);
     const actualCount = this.selectedParticipants.length;
-    
+
     if (isNaN(expectedCount) || expectedCount <= 0) {
       return true;
     }
-    
+
     return expectedCount === actualCount;
   }
 
   getParticipantCountMessage(): string {
     const expectedCount = parseInt(this.requestForm.get('noOfParticipants')?.value);
     const actualCount = this.selectedParticipants.length;
-    
+
     if (isNaN(expectedCount) || expectedCount <= 0) {
       return '';
     }
-    
+
     if (actualCount < expectedCount) {
       return `Please add ${expectedCount - actualCount} more participant(s) or decrease the count.`;
     } else if (actualCount > expectedCount) {

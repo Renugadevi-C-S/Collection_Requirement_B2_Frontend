@@ -66,7 +66,7 @@ export class LdspocEventFormComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10)]],
       duration: ['', [Validators.required, Validators.min(1)]],
       eventType: ['', Validators.required],
-      fundingSource: ['', Validators.required],
+      fundingSource: ['L&D Budget', Validators.required],
       status: ['Planned', Validators.required]
     });
   }
@@ -89,7 +89,7 @@ export class LdspocEventFormComponent implements OnInit {
       )
       .subscribe((event: any) => {
         if (event) {
-          if(event != null){
+          if(event.exception != null){
             alert(event.message)
           }
           else{
@@ -121,7 +121,7 @@ export class LdspocEventFormComponent implements OnInit {
       description: event.description || '',
       duration: event.duration || '',
       eventType: event.eventType || '',
-      fundingSource: event.fundingSource || '',
+      fundingSource: event.fundingSource || 'L&D Budget',
       status: event.status || 'Planned'
     });
   }
@@ -136,7 +136,11 @@ export class LdspocEventFormComponent implements OnInit {
 
   loadApprovedRequests(): void {
     this.isLoadingRequests = true;
-    this.eventService.getAvailableRequestsForEvent()
+    const requestObservable = this.isEditMode && this.eventId
+      ? this.eventService.getAvailableRequestsForEventEdit(this.eventId)
+      : this.eventService.getAvailableRequestsForEvent();
+
+    requestObservable
       .pipe(
         catchError(err => {
           console.error('Error loading approved requests:', err);
@@ -197,11 +201,24 @@ export class LdspocEventFormComponent implements OnInit {
     this.calculatedParticipants = 0;
   }
 
+  hasSelectedRequests(): boolean {
+    return this.selectedRequests.size > 0;
+  }
+
+  isFormValid(): boolean {
+    return this.eventForm.valid && this.hasSelectedRequests();
+  }
+
   //Submit handles both CREATE and EDIT
   onSubmit(): void {
     if (this.eventForm.invalid) {
       this.markFormGroupTouched(this.eventForm);
       alert('Please fill in all required fields correctly.');
+      return;
+    }
+
+    if (!this.hasSelectedRequests()) {
+      alert('Please select at least one approved request to link with the event.');
       return;
     }
 
@@ -233,6 +250,8 @@ export class LdspocEventFormComponent implements OnInit {
         .pipe(
           catchError(err => {
             console.error('Event update error:', err);
+            console.error('Error status:', err.status);
+            console.error('Error message:', err.error);
             alert('Error updating event: ' + (err.error?.message || err.message));
             this.isSubmitting = false;
             return of(null);
@@ -284,14 +303,12 @@ export class LdspocEventFormComponent implements OnInit {
     }
   }
 
-  // Reset logic for edit vs create mode
   onReset(): void {
     if (this.isEditMode) {
-      // Reload original event data
       this.loadEventData();
     } else {
-      // Reset to empty form
       this.eventForm.reset({
+        fundingSource: 'L&D Budget',
         status: 'Planned'
       });
       this.selectedRequests.clear();

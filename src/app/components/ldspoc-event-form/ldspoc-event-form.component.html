@@ -7,9 +7,6 @@
     <h2>{{ isEditMode ? 'Edit Training Event' : 'Create Training Event' }}</h2>
   </div>
 
-  <!-- Show event ID when editing -->
-  <p *ngIf="isEditMode && eventId" class="event-id-info">Event ID: #{{ eventId }}</p>
-
   <!-- Loading overlay  -->
   <div *ngIf="isLoading" class="loading-overlay">
     <div class="spinner"></div>
@@ -122,7 +119,9 @@
           class="form-control"
           [class.is-invalid]="isFieldInvalid('fundingSource')"
         >
+
           <option value="" disabled>Select Funding Source</option>
+          <option value="L&D Budget">L&D Budget</option>
           <option value="Company Budget">Company Budget</option>
           <option value="Department Budget">Department Budget</option>
           <option value="External Grant">External Grant</option>
@@ -144,8 +143,7 @@
         >
           <option value="Planned">Planned</option>
           <option value="In Progress">In Progress</option>
-          <option value="Completed">Completed</option>
-          <option value="Cancelled">Cancelled</option>
+
         </select>
         <small class="error-message" *ngIf="isFieldInvalid('status')">
           {{ getErrorMessage('status') }}
@@ -153,10 +151,10 @@
       </div>
     </div>
 
-    <!-- Link Requests Section -->
+    <!-- Link Requests Section with Required indicator -->
     <div class="link-requests-section">
       <div class="section-header-toggle" (click)="toggleRequestsSection()">
-        <h3>Link Approved Requests (Optional)</h3>
+        <h3>Link Approved Requests <span class="required">*</span></h3>
         <span class="toggle-icon">{{ showRequestsSection ? '▼' : '▶' }}</span>
       </div>
 
@@ -203,19 +201,17 @@
           <p>No approved requests available to link</p>
         </div>
 
-        <!-- Requests Table -->
         <div *ngIf="!isLoadingRequests && availableRequests.length > 0" class="requests-table-container">
           <table class="requests-table">
             <thead>
             <tr>
               <th class="checkbox-column">Select</th>
-              <th>Request ID</th>
-              <th>TAN Number</th>
-              <th>Department</th>
-              <th>Participants</th>
-              <th>Request Date</th>
               <th>Requested By</th>
+              <th>Request Date</th>
               <th>Justification</th>
+              <th>Participants</th>
+              <th>Department</th>
+              <th>TAN Number</th>
             </tr>
             </thead>
             <tbody>
@@ -231,30 +227,36 @@
                   (click)="$event.stopPropagation(); toggleRequestSelection(request.requestId)"
                 />
               </td>
-              <td class="request-id">#{{ request.requestId }}</td>
-              <td>{{ request.tanNumber }}</td>
-              <td>{{ request.department }}</td>
-              <td class="text-center">{{ request.noOfParticipants }}</td>
-              <td>{{ formatDate(request.requestDate) }}</td>
               <td>{{ request.requestedBy }}</td>
+              <td>{{ formatDate(request.requestDate) }}</td>
               <td class="justification">
                 <div class="justification-text" [title]="request.justification">
                   {{ request.justification }}
                 </div>
               </td>
+              <td class="text-center">{{ request.noOfParticipants }}</td>
+              <td>{{ request.department }}</td>
+              <td>{{ request.tanNumber || 'N/A' }}</td>
             </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Validation error message shown below the table -->
+        <div *ngIf="!hasSelectedRequests()" class="request-validation-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span>Please select at least one approved request to create/update the event.</span>
         </div>
       </div>
     </div>
 
     <!--Form Actions - Different text for edit vs create -->
     <div class="form-actions">
+      <!-- Button is disabled if no requests are selected -->
       <button
         type="submit"
         class="btn btn-primary"
-        [disabled]="isSubmitting || isLoading"
+        [disabled]="isSubmitting || isLoading || !isFormValid()"
       >
         {{ isSubmitting ? (isEditMode ? 'Updating Event...' : 'Creating Event...') : (isEditMode ? 'Update Event' : 'Create Event') }}
       </button>
@@ -266,7 +268,7 @@
       >
         {{ isEditMode ? 'Reset to Original' : 'Reset' }}
       </button>
-      <!-- Cancel button  -->
+      <!-- Cancel button -->
       <button
         type="button"
         class="btn btn-secondary"

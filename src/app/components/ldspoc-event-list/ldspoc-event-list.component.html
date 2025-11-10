@@ -23,18 +23,17 @@
     <p>Loading events...</p>
   </div>
 
-  <!-- No Events Message -->
-  <div *ngIf="!isLoading && filteredEvents.length === 0 && !errorMessage" class="no-events">
-    <p *ngIf="events.length === 0">No events found. Create your first training event!</p>
-    <p *ngIf="events.length > 0">No events match your filters.</p>
-  </div>
+<!--  &lt;!&ndash; No Events Message &ndash;&gt;-->
+<!--  <div *ngIf="!isLoading && filteredEvents.length === 0 && !errorMessage" class="no-events">-->
+<!--    <p *ngIf="events.length === 0">No events found. Create your first training event!</p>-->
+<!--    <p *ngIf="events.length > 0">No events match your filters.</p>-->
+<!--  </div>-->
 
   <!-- Events Table -->
   <div *ngIf="!isLoading && events.length > 0" class="table-container">
     <table class="events-table">
       <thead>
       <tr class="header-row">
-        <th>Event ID</th>
         <th>Event Name</th>
         <th>Event Type</th>
         <th>Duration (hrs)</th>
@@ -46,15 +45,6 @@
         <th>
           <input
             type="text"
-            [(ngModel)]="filters.eventId"
-            (input)="applyFilters()"
-            placeholder="Filter ID"
-            class="column-filter"
-          />
-        </th>
-        <th>
-          <input
-            type="text"
             [(ngModel)]="filters.eventName"
             (input)="applyFilters()"
             placeholder="Filter name"
@@ -62,13 +52,20 @@
           />
         </th>
         <th>
-          <input
-            type="text"
+          <select
             [(ngModel)]="filters.eventType"
-            (input)="applyFilters()"
-            placeholder="Filter type"
-            class="column-filter"
-          />
+            (change)="applyFilters()"
+            class="column-filter-select"
+          >
+            <option value="">All Types</option>
+            <option value="Workshop">Workshop</option>
+            <option value="Seminar">Seminar</option>
+            <option value="Training">Training</option>
+            <option value="Conference">Conference</option>
+            <option value="Webinar">Webinar</option>
+            <option value="Certification">Certification</option>
+            <option value="Other">Other</option>
+          </select>
         </th>
         <th></th>
         <th>
@@ -77,11 +74,12 @@
             (change)="applyFilters()"
             class="column-filter-select"
           >
-            <option value="">All Statuses</option>
+            <option value="">All Status</option>
             <option value="Planned">Planned</option>
             <option value="In Progress">In Progress</option>
             <option value="Completed">Completed</option>
             <option value="Cancelled">Cancelled</option>
+            <option value="Deleted">Deleted</option>
           </select>
         </th>
         <th>
@@ -106,7 +104,6 @@
       </thead>
       <tbody>
       <tr *ngFor="let event of filteredEvents" class="event-row">
-        <td class="event-id">#{{ event.eventId }}</td>
         <td class="event-name">{{ event.eventName }}</td>
         <td>{{ event.eventType }}</td>
         <td class="text-center">{{ event.duration }}</td>
@@ -116,7 +113,6 @@
             </span>
         </td>
         <td>{{ event.createdBy }}</td>
-        <!-- ✅ UPDATED: Action buttons cell with view, edit, and delete -->
         <td class="action-buttons">
           <button
             class="btn-action btn-view"
@@ -125,15 +121,43 @@
           >
             <i class="fas fa-eye"></i>
           </button>
+
           <button
+            *ngIf="shouldShowEditButton(event)"
             class="btn-action btn-edit"
             (click)="editEvent(event.eventId)"
-            title="Edit Event"
+            [disabled]="isEditEventButtonDisabled(event)"
+            [title]="getEditEventButtonTitle(event)"
           >
             <i class="fas fa-edit"></i>
           </button>
+
+          <!-- Complete Event Button - Hidden ONLY for Deleted/Completed, Disabled for Cancelled -->
           <button
-            class="btn-action btn-delete"
+            *ngIf="shouldShowCompleteButton(event)"
+            class="btn-action btn-accept"
+            (click)="onCompleteEvent(event)"
+            [disabled]="isCompleteButtonDisabled(event)"
+            [title]="event.status.toLowerCase() === 'completed' ? 'Already Completed' : (event.status.toLowerCase() === 'cancelled' ? 'Cannot complete cancelled event' : 'Complete Event')"
+          >
+            <i class="fas fa-check"></i>
+          </button>
+
+          <!-- Cancel Event Button - Hidden ONLY for Deleted/Cancelled, Disabled for Completed -->
+          <button
+            *ngIf="shouldShowCancelButton(event)"
+            class="btn-action btn-reject"
+            (click)="onCancelEvent(event)"
+            [disabled]="isCancelButtonDisabled(event)"
+            [title]="event.status.toLowerCase() === 'cancelled' ? 'Already Cancelled' : (event.status.toLowerCase() === 'completed' ? 'Cannot cancel completed event' : 'Cancel Event')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+
+          <!-- Delete button hidden when status is "Deleted" -->
+          <button
+            *ngIf="event.status.toLowerCase() !== 'deleted'"
+            class="btn-action btn-delete-grey"
             (click)="deleteEvent(event.eventId)"
             title="Delete Event"
           >
@@ -145,13 +169,19 @@
     </table>
   </div>
 
+  <!-- No Events Message -->
+  <div *ngIf="!isLoading && filteredEvents.length === 0 && !errorMessage" class="no-events">
+    <p *ngIf="events.length === 0">No events found. Create your first training event!</p>
+    <p *ngIf="events.length > 0">No events match your filters.</p>
+  </div>
+
   <!-- Summary -->
   <div *ngIf="!isLoading && events.length > 0" class="summary-section">
     <p>Showing {{ filteredEvents.length }} of {{ events.length }} event(s)</p>
   </div>
 </div>
 
-<!-- Enhanced Modal for Event Details with ALL fields + Linked Requests -->
+<!-- Modal for Event Details  -->
 <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
   <div class="modal-content view-modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -171,11 +201,6 @@
     <div class="modal-body" *ngIf="!isLoadingDetails && selectedEvent">
       <div class="detail-grid">
         <div class="detail-item">
-          <label>Event ID:</label>
-          <span class="detail-value">{{ selectedEvent.eventId }}</span>
-        </div>
-
-        <div class="detail-item">
           <label>Event Name:</label>
           <span class="detail-value">{{ selectedEvent.eventName }}</span>
         </div>
@@ -188,6 +213,11 @@
         <div class="detail-item">
           <label>Duration (hours):</label>
           <span class="detail-value">{{ selectedEvent.duration }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>Event Created Date:</label>
+          <span class="detail-value">{{ selectedEvent.createdDate ? formatDate(selectedEvent.createdDate) : 'Not Set' }}</span>
         </div>
 
         <!-- Funding Source -->
@@ -219,9 +249,42 @@
           <label>Description:</label>
           <div class="detail-value justification-full">{{ selectedEvent.description || 'N/A' }}</div>
         </div>
+
+        <ng-container *ngIf="selectedEvent.status?.toLowerCase() === 'completed'">
+          <div class="detail-item">
+            <label>Completed By:</label>
+            <span class="detail-value">{{ selectedEvent.completedBy || 'N/A' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label>Completed Date:</label>
+            <span class="detail-value">{{ selectedEvent.completedDate ? formatDate(selectedEvent.completedDate) : 'N/A' }}</span>
+          </div>
+
+          <div class="detail-item full-width">
+            <label>Completion Notes:</label>
+            <div class="detail-value justification-full">{{ selectedEvent.completionNotes || 'N/A' }}</div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="selectedEvent.status?.toLowerCase() === 'cancelled'">
+          <div class="detail-item">
+            <label>Cancelled By:</label>
+            <span class="detail-value">{{ selectedEvent.cancelledBy || 'N/A' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label>Cancelled Date:</label>
+            <span class="detail-value">{{ selectedEvent.cancelledDate ? formatDate(selectedEvent.cancelledDate) : 'N/A' }}</span>
+          </div>
+
+          <div class="detail-item full-width">
+            <label>Cancellation Notes:</label>
+            <div class="detail-value justification-full">{{ selectedEvent.cancellationNotes || 'N/A' }}</div>
+          </div>
+        </ng-container>
       </div>
 
-      <!-- Linked Requests Section -->
       <div *ngIf="selectedEvent.linkedRequests && selectedEvent.linkedRequests.length > 0" class="linked-requests-section">
         <h3 class="section-title">Linked Requests ({{ selectedEvent.linkedRequests.length }})</h3>
 
@@ -229,46 +292,105 @@
           <table class="linked-requests-table">
             <thead>
             <tr>
-              <th>Request ID</th>
-              <th>TAN Number</th>
               <th>Department</th>
-              <th>Participants</th>
-              <th>Requested By</th>
-              <th>Status</th>
               <th>Justification</th>
+              <th>Participants</th>
+              <th>TAN Number</th>
+              <th>Status</th>
+              <th>Requested By</th>
             </tr>
             </thead>
             <tbody>
             <tr *ngFor="let request of selectedEvent.linkedRequests">
-              <td class="request-id">#{{ request.requestId }}</td>
-              <td>{{ request.tanNo }}</td>
               <td>{{ request.department }}</td>
-              <td class="text-center">{{ request.noOfParticipants }}</td>
-              <td>{{ request.requestedBy }}</td>
-              <td>
-                  <span [class]="'status-badge ' + getStatusClass(request.requestStatus)">
-                    {{ request.requestStatus }}
-                  </span>
-              </td>
               <td class="justification">
                 <div class="justification-text" [title]="request.justification">
                   {{ request.justification }}
                 </div>
               </td>
+              <td class="text-center">{{ request.noOfParticipants }}</td>
+              <td>{{ request.tanNo || 'N/A' }}</td>
+              <td>
+                <span [class]="'status-badge ' + getStatusClass(request.requestStatus)">
+                    {{ request.requestStatus }}
+                  </span>
+              </td>
+              <td>{{ request.requestedBy }}</td>
             </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- No linked requests message -->
+      <!-- No linked requests message for cancelled events -->
       <div *ngIf="!selectedEvent.linkedRequests || selectedEvent.linkedRequests.length === 0" class="no-linked-requests">
-        <p>No requests linked to this event.</p>
+        <p *ngIf="selectedEvent.status?.toLowerCase() === 'cancelled'">
+          ⚠️ This event was cancelled. All requests have been unlinked and their statuses changed back to "Approved".
+        </p>
+        <p *ngIf="selectedEvent.status?.toLowerCase() !== 'cancelled'">
+          No requests linked to this event.
+        </p>
       </div>
     </div>
 
     <div class="modal-footer">
       <button class="btn-modal-close" (click)="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Complete/Cancel Event Modal -->
+<div *ngIf="showApprovalModal" class="modal-overlay" (click)="closeApprovalModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ isApprovalAction ? 'Complete Event' : 'Cancel Event' }}</h3>
+      <button class="btn-close" (click)="closeApprovalModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Event Name: <strong>{{ selectedEventForApproval?.eventName }}</strong></p>
+      <p>Created By: <strong>{{ selectedEventForApproval?.createdBy }}</strong></p>
+
+      <p *ngIf="isApprovalAction" style="color: #dc3545; font-weight: 600; margin-top: 15px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+        ⚠️ After completion, this event CANNOT be cancelled
+      </p>
+
+      <p *ngIf="!isApprovalAction" style="color: #dc3545; font-weight: 600; margin-top: 15px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+        ⚠️ After cancellation, this event CANNOT be completed
+      </p>
+
+      <div class="form-group">
+        <label for="approvalNotes">
+          {{ isApprovalAction ? 'Completion' : 'Cancellation' }} Notes <span class="required">*</span>
+        </label>
+        <textarea
+          id="approvalNotes"
+          [(ngModel)]="approvalNotes"
+          rows="4"
+          placeholder="Enter notes for this {{ isApprovalAction ? 'completion' : 'cancellation' }}"
+          class="form-control"
+          [class.is-invalid]="showNotesError"
+        ></textarea>
+        <small class="error-message" *ngIf="showNotesError">
+          Notes are required (minimum 10 characters)
+        </small>
+      </div>
+
+      <div *ngIf="submissionError" class="error-alert">
+        <span>⚠️ {{ submissionError }}</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeApprovalModal()" [disabled]="isSubmittingApproval">
+        Cancel
+      </button>
+      <button
+        [class]="isApprovalAction ? 'btn-primary' : 'btn-danger'"
+        (click)="submitEventApproval()"
+        [disabled]="isSubmittingApproval"
+      >
+        <span *ngIf="!isSubmittingApproval">{{ isApprovalAction ? 'Complete' : 'Cancel Event' }}</span>
+        <span *ngIf="isSubmittingApproval">Processing...</span>
+      </button>
     </div>
   </div>
 </div>

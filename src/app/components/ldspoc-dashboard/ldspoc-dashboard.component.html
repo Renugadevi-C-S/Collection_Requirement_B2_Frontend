@@ -1,20 +1,20 @@
 <div class="ldspoc-dashboard-container">
 
-    <nav class="nav-bar">
-        <a routerLink="/ldspoc-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
-        <a routerLink="/ldspoc-dashboard/request-list" routerLinkActive="active">Requests</a>
-        <a routerLink="/ldspoc-dashboard/view-events" routerLinkActive="active">Events</a>
-    </nav>
-     <div class="dashboard-header">
-        <div class="header-title">
-            <h1>L&D Dashboard</h1>
-            <p class="welcome-text">Welcome, {{ getUserDisplayName() }}!</p>
-        </div>
-    </div>
-    <div>
-        <router-outlet></router-outlet>
-    </div>
+  <nav class="nav-bar">
+    <a routerLink="/ldspoc-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
+    <a routerLink="/ldspoc-dashboard/request-list" routerLinkActive="active">Requests</a>
+    <a routerLink="/ldspoc-dashboard/view-events" routerLinkActive="active">Events</a>
+  </nav>
 
-    
+  <div class="dashboard-header">
+    <div class="header-title">
+      <h1>L&D Dashboard</h1>
+      <p class="welcome-text">Welcome, {{ getUserDisplayName() }}!</p>
+    </div>
+  </div>
+
+  <div>
+    <router-outlet></router-outlet>
+  </div>
+
 </div>
-

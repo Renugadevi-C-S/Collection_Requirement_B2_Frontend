@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { RequestService } from '../../services/request.service';
 import { requestsViewDetails } from '../../model/requestsViewDetails';
@@ -22,11 +23,11 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
   private userSubscription?: Subscription;
   isLoading: boolean = false;
   errorMessage: string = '';
-  
+
   // Modal properties
   showModal: boolean = false;
   selectedRequest: requestsViewDetails | null = null;
-  
+
   filters = {
     requestId: '',
     eventName: '',
@@ -39,7 +40,8 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
 
   constructor(
     private userService: UserService,
-    private requestService: RequestService
+    private requestService: RequestService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -89,13 +91,6 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     let filtered = [...this.requests];
 
-    // Filter by Request ID
-    if (this.filters.requestId) {
-      filtered = filtered.filter(req => 
-        req.requestId.toString().includes(this.filters.requestId)
-      );
-    }
-
     // Filter by Event Name
     if (this.filters.eventName) {
       const term = this.filters.eventName.toLowerCase();
@@ -127,10 +122,15 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Filter by Status
+    // Filter out "Deleted" status by default (unless explicitly selected)
     if (this.filters.status) {
-      filtered = filtered.filter(req => 
+      filtered = filtered.filter(req =>
         req.requestStatus.toLowerCase() === this.filters.status.toLowerCase()
+      );
+    } else {
+      // If no status filter selected, exclude "Deleted" requests by default
+      filtered = filtered.filter(req =>
+        req.requestStatus.toLowerCase() !== 'deleted'
       );
     }
 
@@ -160,14 +160,11 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
-      case 'pending':
-        return 'status-pending';
       case 'approved':
         return 'status-approved';
       case 'rejected':
         return 'status-rejected';
-      case 'in progress':
-      case 'inprogress':
+      case 'in-progress':
         return 'status-in-progress';
       case 'completed':
         return 'status-completed';
@@ -179,15 +176,19 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
   formatDate(date: Date | string): string {
     if (!date) return 'N/A';
     const d = new Date(date);
-    return d.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return d.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   }
 
   refreshRequests(): void {
     this.loadRequests();
+  }
+
+  navigateToNewRequest(): void {
+    this.router.navigate(['/lc-dashboard/submit-request']);
   }
 
   // Modal methods
@@ -202,4 +203,3 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
     this.selectedRequest = null;
   }
 }
-

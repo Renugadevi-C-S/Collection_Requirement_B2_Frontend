@@ -5,16 +5,16 @@
     </button>
     <h2>Submit Training Request</h2>
   </div>
-  
+
   <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" class="request-form">
-    
+
     <!-- Requestor ID (Read-only) -->
     <div class="form-group">
       <label for="requestorId">Requestor CDS ID</label>
-      <input 
-        type="text" 
-        id="requestorId" 
-        [value]="currentUser?.cdsId || ''" 
+      <input
+        type="text"
+        id="requestorId"
+        [value]="currentUser?.cdsId || ''"
         readonly
         class="form-control readonly-field"
       />
@@ -24,7 +24,7 @@
     <!-- Justification -->
     <div class="form-group">
       <label for="justification">Justification <span class="required">*</span></label>
-      <textarea 
+      <textarea
         id="justification"
         formControlName="justification"
         rows="4"
@@ -39,8 +39,8 @@
 
     <!-- TAN Number -->
     <div class="form-group">
-      <label for="tanNo">TAN Number <span class="required">*</span></label>
-      <input 
+      <label for="tanNo">TAN Number</label>
+      <input
         type="text"
         id="tanNo"
         formControlName="tanNo"
@@ -56,7 +56,7 @@
     <!-- Number of Participants -->
     <div class="form-group">
       <label for="noOfParticipants">Number of Participants <span class="required">*</span></label>
-      <input 
+      <input
         type="number"
         id="noOfParticipants"
         formControlName="noOfParticipants"
@@ -72,12 +72,12 @@
     <!-- Participants Section -->
     <div class="form-group">
       <label>Add Participants <span class="required">*</span></label>
-      
+
       <!-- Search Input -->
       <div class="participant-search-wrapper">
         <div class="search-input-container">
           <i class="fa-solid fa-magnifying-glass search-icon-prefix"></i>
-          <input 
+          <input
             type="text"
             [formControl]="searchControl"
             placeholder="Search by name or CDSID..."
@@ -88,10 +88,10 @@
           />
           <span class="search-hint" *ngIf="!searchControl.value">Start typing to search users</span>
         </div>
-        
+
         <!-- User Dropdown -->
-        <div 
-          class="user-dropdown" 
+        <div
+          class="user-dropdown"
           *ngIf="showUserDropdown && getAvailableUsers().length > 0"
           (mouseenter)="onDropdownMouseEnter()"
           (mouseleave)="onDropdownMouseLeave()"
@@ -100,8 +100,8 @@
             <i class="fa-solid fa-users header-dropdown-icon"></i>
             <span class="available-count">{{ getAvailableUsers().length }} user(s) available</span>
           </div>
-          <div 
-            class="user-item" 
+          <div
+            class="user-item"
             *ngFor="let user of getAvailableUsers()"
             (mousedown)="onUserSelect($event, user)"
           >
@@ -120,8 +120,8 @@
         </div>
 
         <!-- No Results -->
-        <div 
-          class="user-dropdown" 
+        <div
+          class="user-dropdown"
           *ngIf="showUserDropdown && searchControl.value && getAvailableUsers().length === 0"
           (mouseenter)="onDropdownMouseEnter()"
         >
@@ -143,9 +143,9 @@
             <span class="header-title">Selected Participants</span>
             <span class="participant-count-badge">{{ selectedParticipants.length }}</span>
           </div>
-          <span 
-            class="count-status" 
-            [class.count-valid]="validateParticipantCount()" 
+          <span
+            class="count-status"
+            [class.count-valid]="validateParticipantCount()"
             [class.count-invalid]="!validateParticipantCount()"
           >
             <i class="fa-solid" [ngClass]="validateParticipantCount() ? 'fa-circle-check' : 'fa-circle-exclamation'"></i>
@@ -166,9 +166,9 @@
                 {{ participant.email }}
               </span>
             </div>
-            <button 
-              type="button" 
-              class="remove-btn" 
+            <button
+              type="button"
+              class="remove-btn"
               (mousedown)="removeParticipant($event, participant.cdsId)"
               title="Remove {{ participant.firstName }} {{ participant.lastName }}"
             >
@@ -188,7 +188,7 @@
       <!-- Help Text -->
       <small class="form-text">
         <i class="fa-solid fa-circle-info"></i>
-        <strong>Tip:</strong> Search and select participants for this training request. 
+        <strong>Tip:</strong> Search and select participants for this training request.
         The count must match the number of participants specified above.
       </small>
     </div>
@@ -197,7 +197,7 @@
     <!-- Department -->
     <div class="form-group">
       <label for="department">Department <span class="required">*</span></label>
-      <select 
+      <select
         id="department"
         formControlName="department"
         class="form-control"
@@ -226,7 +226,7 @@
     <div class="form-group">
       <label for="curriculum">Curriculum Document (PDF/Excel)</label>
       <div class="file-input-wrapper">
-        <input 
+        <input
           type="file"
           id="curriculum"
           (change)="onFileSelected($event)"
@@ -243,15 +243,15 @@
 
     <!-- Form Actions -->
     <div class="form-actions">
-      <button 
-        type="submit" 
+      <button
+        type="submit"
         class="btn btn-primary"
         [disabled]="isSubmitting"
       >
         {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
       </button>
-      <button 
-        type="button" 
+      <button
+        type="button"
         class="btn btn-secondary"
         (click)="onReset()"
         [disabled]="isSubmitting"

@@ -126,6 +126,7 @@
   border: 1px solid #ced4da;
   border-radius: 4px;
   font-size: 14px;
+  font-family: "Ford Antenna", Arial, sans-serif;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
@@ -168,10 +169,12 @@
 textarea.form-control {
   resize: vertical;
   min-height: 100px;
+  font-family: "Ford Antenna", Arial, sans-serif;
 }
 
 select.form-control {
   cursor: pointer;
+  font-family: "Ford Antenna", Arial, sans-serif;
 }
 
 /* Link Requests Section */
@@ -440,6 +443,44 @@ select.form-control {
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Request Validation Error Styling */
+.request-validation-error {
+  margin-top: 15px;
+  padding: 12px 15px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-left: 4px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  font-size: 0.95em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.request-validation-error i {
+  font-size: 1.2em;
+  color: #ffc107;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.link-requests-section .section-header-toggle h3 .required {
+  color: #dc3545;
+  font-size: 1em;
+  margin-left: 5px;
 }
 
 /* Responsive Design */
