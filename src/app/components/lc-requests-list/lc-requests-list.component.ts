@@ -73,11 +73,16 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
           return of([]);
         })
       )
-      .subscribe(requests => {
-        this.requests = requests;
-        this.filteredRequests = requests;
-        this.isLoading = false;
-        this.applyFilters();
+      .subscribe((response: any) => {
+        if(response.exception != null){
+          alert(response.message);
+        }
+        else {
+          this.requests = response;
+          this.filteredRequests = response;
+          this.isLoading = false;
+          this.applyFilters();
+        }
       });
   }
 

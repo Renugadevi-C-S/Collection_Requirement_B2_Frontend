@@ -64,7 +64,7 @@ export class LoginComponent implements OnInit {
           if (response) {
              
             console.log('Login response:', response);
-            if(response.status == 400){
+            if(response.exception != null){
               alert(response.message);
             }
             else{

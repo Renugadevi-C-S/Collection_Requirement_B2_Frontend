@@ -75,11 +75,16 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
           return of([]);
         })
       )
-      .subscribe(events => {
-        this.events = events;
-        this.filteredEvents = events;
-        this.isLoading = false;
-        this.applyFilters();
+      .subscribe((events: any) => {
+        if(events.exception != null){
+          alert(events.message);
+        }
+        else{
+          this.events = events;
+          this.filteredEvents = events;
+          this.isLoading = false;
+          this.applyFilters();
+        }
       });
   }
 
@@ -168,8 +173,11 @@ export class LdspocEventListComponent implements OnInit, OnDestroy {
           return of(null);
         })
       )
-      .subscribe(eventDetails => {
-        if (eventDetails) {
+      .subscribe((eventDetails: any) => {
+        if (eventDetails.exception != null) {
+          alert(eventDetails.message);
+        }
+        else{
           this.selectedEvent = eventDetails;
         }
         this.isLoadingDetails = false;

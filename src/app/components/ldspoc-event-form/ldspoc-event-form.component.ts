@@ -87,20 +87,25 @@ export class LdspocEventFormComponent implements OnInit {
           return of(null);
         })
       )
-      .subscribe(event => {
+      .subscribe((event: any) => {
         if (event) {
-          this.originalCreatorId = event.createdBy || '';
-          this.populateForm(event);
+          if(event != null){
+            alert(event.message)
+          }
+          else{
+            this.originalCreatorId = event.createdBy || '';
+            this.populateForm(event);
 
-          // If event has linked requests, load them and show selection
-          if (event.linkedRequests && event.linkedRequests.length > 0) {
-            this.loadApprovedRequests();
-            // Pre-select linked requests
-            event.linkedRequests.forEach(req => {
-              this.selectedRequests.add(req.requestId);
-            });
-            this.calculateTotalParticipants();
-            this.showRequestsSection = true;
+            // If event has linked requests, load them and show selection
+            if (event.linkedRequests && event.linkedRequests.length > 0) {
+              this.loadApprovedRequests();
+              // Pre-select linked requests
+              event.linkedRequests.forEach((req: any) => {
+                this.selectedRequests.add(req.requestId);
+              });
+              this.calculateTotalParticipants();
+              this.showRequestsSection = true;
+            }
           }
         } else {
           this.errorMessage = 'Event not found.';
@@ -140,9 +145,16 @@ export class LdspocEventFormComponent implements OnInit {
           return of([]);
         })
       )
-      .subscribe((requests: AvailableRequest[]) => {
-        this.availableRequests = requests;
-        this.isLoadingRequests = false;
+      .subscribe((requests: any) => {
+        if(requests){
+          if(requests.exception != null){
+            alert(requests.message)
+          }
+          else{
+            this.availableRequests = requests;
+            this.isLoadingRequests = false; 
+          }
+        }
       });
   }
 
@@ -226,11 +238,16 @@ export class LdspocEventFormComponent implements OnInit {
             return of(null);
           })
         )
-        .subscribe(response => {
+        .subscribe((response: any) => {
           this.isSubmitting = false;
           if (response) {
-            alert('Event updated successfully! Creator ID remains: ' + this.originalCreatorId);
-            this.router.navigate(['/ldspoc-dashboard/view-events']);
+            if(response.exception != null){
+              alert(response.message)
+            }
+            else{
+              alert(response.message);
+              this.router.navigate(['/ldspoc-dashboard/view-events']);
+            }
           }
         });
     } else {
@@ -252,10 +269,15 @@ export class LdspocEventFormComponent implements OnInit {
             return of(null);
           })
         )
-        .subscribe(response => {
+        .subscribe((response: any) => {
           if (response) {
-            alert(response.message || 'Event created successfully!');
-            this.router.navigate(['/ldspoc-dashboard/view-events']);
+            if(response.exception != null){
+              alert(response.message)
+            }
+            else{
+              alert(response.message || 'Event created successfully!');
+              this.router.navigate(['/ldspoc-dashboard/view-events']);
+            }
           }
           this.isSubmitting = false;
         });

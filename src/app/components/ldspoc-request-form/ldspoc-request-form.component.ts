@@ -104,10 +104,15 @@ export class LdspocRequestFormComponent implements OnInit, OnDestroy {
           return of([]);
         })
       )
-      .subscribe(users => {
-        this.allUsers = users;
-        this.filteredUsers = users;
-        console.log('Loaded users:', users.length);
+      .subscribe((users: any) => {
+        if(users.exception != null){
+          alert(users.message);
+        }
+        else{
+          this.allUsers = users;
+          this.filteredUsers = users;
+          console.log('Loaded users:', users.length);
+        }
       });
   }
 
@@ -216,9 +221,9 @@ export class LdspocRequestFormComponent implements OnInit, OnDestroy {
     }
     
     if (actualCount < expectedCount) {
-      return `Please add ${expectedCount - actualCount} more participant(s)`;
+      return `Please add ${expectedCount - actualCount} more participant(s) or decrease the count`;
     } else if (actualCount > expectedCount) {
-      return `Please remove ${actualCount - expectedCount} participant(s)`;
+      return `Please remove ${actualCount - expectedCount} participant(s) or increase the count.`;
     } else {
       return 'Participant count matches ✓';
     }
@@ -239,12 +244,15 @@ export class LdspocRequestFormComponent implements OnInit, OnDestroy {
           return of(null);
         })
       )
-      .subscribe(request => {
-        if (request) {
+      .subscribe((request: any) => {
+        if (request.exception != null) {
+          alert(request.message);
+          this.errorMessage = 'Request not found.';
+        } 
+        else {
+          this.errorMessage = 'Request not found.';
           this.originalRequestorId = request.requestedBy || '';
           this.populateForm(request);
-        } else {
-          this.errorMessage = 'Request not found.';
         }
         this.isLoading = false;
       });
@@ -338,8 +346,11 @@ export class LdspocRequestFormComponent implements OnInit, OnDestroy {
         )
         .subscribe(response => {
           this.isSubmitting = false;
-          if (response) {
-            alert('Request updated successfully! Requestor ID remains: ' + this.originalRequestorId);
+          if (response.exception != null) {
+            alert(response.message);
+          }
+          else{
+            alert('Request updated successfully!');
             this.router.navigate(['/ldspoc-dashboard']);
           }
         });
@@ -365,9 +376,12 @@ export class LdspocRequestFormComponent implements OnInit, OnDestroy {
             return of(null);
           })
         )
-        .subscribe(response => {
+        .subscribe((response: any) => {
           this.isSubmitting = false;
-          if (response) {
+          if (response.exception != null) {
+            alert(response.message);
+          }
+          else {
             alert(response.message || 'Request submitted successfully!');
             this.requestForm.reset();
             this.selectedFileName = 'No file selected';

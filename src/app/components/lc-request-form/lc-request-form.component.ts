@@ -82,10 +82,15 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
           return of([]);
         })
       )
-      .subscribe(users => {
-        this.allUsers = users;
-        this.filteredUsers = users;
-        console.log('Loaded users:', users.length);
+      .subscribe((response: any) => {
+
+        if(response.exception != null)
+          alert(response.message);
+        else{
+          this.allUsers = response;
+          this.filteredUsers = response;
+          console.log('Loaded users:', response.length);
+        }
       });
   }
 
@@ -197,9 +202,9 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
     }
     
     if (actualCount < expectedCount) {
-      return `Please add ${expectedCount - actualCount} more participant(s)`;
+      return `Please add ${expectedCount - actualCount} more participant(s) or decrease the count.`;
     } else if (actualCount > expectedCount) {
-      return `Please remove ${actualCount - expectedCount} participant(s)`;
+      return `Please remove ${actualCount - expectedCount} participant(s) or increase the count.`;
     } else {
       return 'Participant count matches ✓';
     }
@@ -263,15 +268,19 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
             return of(null);
           })
         )
-        .subscribe(response => {
+        .subscribe((response: any | null) => {
           this.isSubmitting = false;
           if (response) {
-            alert(response.message);
-            this.requestForm.reset();
-            this.selectedFileName = 'No file selected';
-            this.selectedParticipants = [];
-            this.searchControl.setValue('');
-            this.router.navigate(['/lc-dashboard']);
+            if(response.exception != null)
+              alert(response.message)
+            else {
+              alert(response.message);
+              this.requestForm.reset();
+              this.selectedFileName = 'No file selected';
+              this.selectedParticipants = [];
+              this.searchControl.setValue('');
+              this.router.navigate(['/lc-dashboard']);
+            }
           }
         });
     }

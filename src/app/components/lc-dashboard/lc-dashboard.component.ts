@@ -56,7 +56,7 @@ export class LcDashboardComponent implements OnInit, OnDestroy {
     if (this.currentUser) {
       return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
     }
-    return 'User';
+    return 'Invalid User';
   }
 
   navigateToNewRequest(): void {

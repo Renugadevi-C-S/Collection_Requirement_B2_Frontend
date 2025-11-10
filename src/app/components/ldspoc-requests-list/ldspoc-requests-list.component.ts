@@ -101,11 +101,16 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
           return of([]);
         })
       )
-      .subscribe(requests => {
-        this.requests = requests;
-        this.filteredRequests = requests;
-        this.isLoading = false;
-        this.applyFilters();
+      .subscribe((requests: any) => {
+        if(requests.exception != null){
+          alert(requests.message);
+        }
+        else{
+          this.requests = requests;
+          this.filteredRequests = requests;
+          this.isLoading = false;
+          this.applyFilters();
+        }
       });
   }
 
@@ -300,31 +305,32 @@ export class LdspocRequestsListComponent implements OnInit, OnDestroy {
           return of(null);
         })
       )
-      .subscribe(response => {
-        if (response) {
-          // Update the request status in the local list
-          const requestIndex = this.requests.findIndex(r => r.requestId === this.selectedRequest?.requestId);
-          if (requestIndex !== -1) {
-            this.requests[requestIndex].requestStatus = this.isApprovalAction ? 'Approved' : 'Rejected';
-          }
+      .subscribe((response: any) => {
+        if (response.exception != null) {
           alert(response.message);
-          
-          this.applyFilters();
-          
-          // Close modal and reset
-          this.showApprovalModal = false;
-          this.selectedRequest = null;
-          this.approvalNotes = '';
           this.isSubmittingApproval = false;
-          
-          // Optionally reload all requests to ensure data consistency
-          // this.loadRequests();
+
         } else {
-          this.isSubmittingApproval = false;
+            // Update the request status in the local list
+            const requestIndex = this.requests.findIndex(r => r.requestId === this.selectedRequest?.requestId);
+            if (requestIndex !== -1) {
+              this.requests[requestIndex].requestStatus = this.isApprovalAction ? 'Approved' : 'Rejected';
+            }
+            alert(response.message);
+            
+            this.applyFilters();
+            
+            // Close modal and reset
+            this.showApprovalModal = false;
+            this.selectedRequest = null;
+            this.approvalNotes = '';
+            this.isSubmittingApproval = false;
+            
+            // Optionally reload all requests to ensure data consistency
+            this.loadRequests();
         }
       });
   }
-
 
     viewRequestDetails(request: requestsViewDetails): void {
     this.selectedViewRequest = request;
