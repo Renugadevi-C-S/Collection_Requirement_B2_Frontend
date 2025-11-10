@@ -1,19 +1,20 @@
 <div class="lc-dashboard-container">
-    <div class="dashboard-header">
-        <div class="header-title">
-            <h1>LC Dashboard</h1>
-        </div>
-        <div class="header-actions">
-            <button class="btn-new-request" (click)="navigateToNewRequest()">
-                <span class="plus-icon">+</span> New Request
-            </button>
-            <button class="btn-reload" (click)="reloadRequests()" [disabled]="isLoading" title="Reload requests">
-                <span class="reload-icon">🔄</span> Reload
-            </button>
-        </div>
+
+  <nav class="nav-bar">
+    <a routerLink="/lc-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
+    <a routerLink="/lc-dashboard/requests" routerLinkActive="active">Requests</a>
+  </nav>
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-title">
+      <h1>LC Dashboard</h1>
+      <p class="welcome-text">Welcome, {{ getUserDisplayName() }}!</p>
     </div>
-    <div class="dashboard-content">
-        <router-outlet></router-outlet>
-        <app-lc-requests-list #requestsList *ngIf="showRequestsList()"></app-lc-requests-list>
-    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <router-outlet></router-outlet>
+  </div>
+
 </div>

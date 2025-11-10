@@ -9,6 +9,8 @@ import { LdspocEventFormComponent } from './components/ldspoc-event-form/ldspoc-
 import { LdspocEventListComponent } from './components/ldspoc-event-list/ldspoc-event-list.component';
 import { authGuard, roleGuard } from './guards/auth.guard';
 import { LdspocRequestsListComponent } from './components/ldspoc-requests-list/ldspoc-requests-list.component';
+import { LdspocDashboardHomeComponent } from './components/ldspoc-dashboard-home/ldspoc-dashboard-home.component';
+import { LcDashboardHomeComponent } from './components/lc-dashboard-home/lc-dashboard-home.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -19,6 +21,9 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['LC', 'ADMIN','LNDSPOC'] },
     children: [
+      { path: '', component: LcDashboardHomeComponent },
+      { path: 'requests', component: LcRequestsListComponent },
+      { path: '', component: LcDashboardHomeComponent },
       { path: 'submit-request', component: LcRequestFormComponent }
     ]
   },
@@ -28,6 +33,7 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['LNDSPOC', 'ADMIN'] },
     children: [
+      { path: '', component: LdspocDashboardHomeComponent },
       { path: 'submit-request', component: LdspocRequestFormComponent },
       {path:'request-list',component:LdspocRequestsListComponent},
       { path: 'edit-request/:id', component: LdspocRequestFormComponent },

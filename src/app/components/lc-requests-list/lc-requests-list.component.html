@@ -1,6 +1,15 @@
-<div class="requests-list-container">
-  <div class="header-section">
+<div class="requests-list-page"> <!-- ✅ New wrapper for separate page -->
+
+  <div class="page-header">
     <h2>My Training Requests</h2>
+    <div class="header-actions">
+      <button class="btn-new-request" (click)="navigateToNewRequest()">
+        <span class="plus-icon">+</span> New Request
+      </button>
+      <button class="btn-reload" (click)="refreshRequests()" [disabled]="isLoading" title="Reload requests">
+        <span class="reload-icon">🔄</span> Reload
+      </button>
+    </div>
   </div>
 
   <!-- Error Message -->
@@ -25,123 +34,112 @@
   <div *ngIf="!isLoading && requests.length > 0" class="table-container">
     <table class="requests-table">
       <thead>
-        <tr class="header-row">
-<!--          <th>Request ID</th>-->
-          <th>Event Name</th>
-          <th>Department</th>
-          <th>Participants</th>
-          <th>Request Date</th>
-          <th>Status</th>
-          <th>Justification</th>
-          <th>Actions</th>
-        </tr>
-        <tr class="filter-row">
-<!--          <th>-->
-<!--            <input -->
-<!--              type="text"-->
-<!--              [(ngModel)]="filters.requestId"-->
-<!--              (input)="applyFilters()"-->
-<!--              placeholder="Filter ID"-->
-<!--              class="column-filter"-->
-<!--            />-->
-<!--          </th>-->
-          <th>
-            <input
-              type="text"
-              [(ngModel)]="filters.eventName"
-              (input)="applyFilters()"
-              placeholder="Filter event"
-              class="column-filter"
-            />
-          </th>
-          <th>
-            <input
-              type="text"
-              [(ngModel)]="filters.department"
-              (input)="applyFilters()"
-              placeholder="Filter dept"
-              class="column-filter"
-            />
-          </th>
-          <th>
-            <input
-              type="number"
-              [(ngModel)]="filters.participants"
-              (input)="applyFilters()"
-              placeholder="Filter #"
-              class="column-filter"
-            />
-          </th>
-          <th>
-            <input
-              type="text"
-              [(ngModel)]="filters.requestDate"
-              (input)="applyFilters()"
-              placeholder="Filter date"
-              class="column-filter"
-            />
-          </th>
-          <th>
-            <select
-              [(ngModel)]="filters.status"
-              (change)="applyFilters()"
-              class="column-filter-select"
-            >
-              <option value=""> </option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-              <option value="in-progress">In-Progress</option>
-              <option value="completed">Completed</option>
-              <option value="deleted">Deleted</option>
-            </select>
-          </th>
-          <th>
-            <input
-              type="text"
-              [(ngModel)]="filters.justification"
-              (input)="applyFilters()"
-              placeholder="Filter text"
-              class="column-filter"
-            />
-          </th>
-          <th>
-            <button
-              (click)="clearFilters()"
-              class="btn-clear-filter"
-              title="Clear all filters"
-            >
-              <span class="clear-icon">🔄</span> Clear
-            </button>
-          </th>
-        </tr>
+      <tr class="header-row">
+        <th>Event Name</th>
+        <th>Department</th>
+        <th>Participants</th>
+        <th>Request Date</th>
+        <th>Status</th>
+        <th>Justification</th>
+        <th>Actions</th>
+      </tr>
+      <tr class="filter-row">
+        <th>
+          <input
+            type="text"
+            [(ngModel)]="filters.eventName"
+            (input)="applyFilters()"
+            placeholder="Filter event"
+            class="column-filter"
+          />
+        </th>
+        <th>
+          <input
+            type="text"
+            [(ngModel)]="filters.department"
+            (input)="applyFilters()"
+            placeholder="Filter dept"
+            class="column-filter"
+          />
+        </th>
+        <th>
+          <input
+            type="number"
+            [(ngModel)]="filters.participants"
+            (input)="applyFilters()"
+            placeholder="Filter #"
+            class="column-filter"
+          />
+        </th>
+        <th>
+          <input
+            type="text"
+            [(ngModel)]="filters.requestDate"
+            (input)="applyFilters()"
+            placeholder="Filter date"
+            class="column-filter"
+          />
+        </th>
+        <th>
+          <select
+            [(ngModel)]="filters.status"
+            (change)="applyFilters()"
+            class="column-filter-select"
+          >
+            <option value=""> </option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="in-progress">In-Progress</option>
+            <option value="completed">Completed</option>
+            <option value="deleted">Deleted</option>
+          </select>
+        </th>
+        <th>
+          <input
+            type="text"
+            [(ngModel)]="filters.justification"
+            (input)="applyFilters()"
+            placeholder="Filter text"
+            class="column-filter"
+          />
+        </th>
+        <th>
+          <button
+            (click)="clearFilters()"
+            class="btn-clear-filter"
+            title="Clear all filters"
+          >
+            <span class="clear-icon">🔄</span> Clear
+          </button>
+        </th>
+      </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let request of filteredRequests" class="request-row">
-<!--          <td class="request-id">{{ request.requestId }}</td>-->
-          <td class="event-name">{{ request.eventName || 'N/A' }}</td>
-          <td>{{ request.department }}</td>
-          <td class="text-center">{{ request.noOfParticipants }}</td>
-          <td>{{ formatDate(request.requestDate) }}</td>
-          <td>
+      <tr *ngFor="let request of filteredRequests" class="request-row">
+        <td class="event-name">{{ request.eventName || 'N/A' }}</td>
+        <td>{{ request.department }}</td>
+        <td class="text-center">{{ request.noOfParticipants }}</td>
+        <td>{{ formatDate(request.requestDate) }}</td>
+        <td>
             <span [class]="'status-badge ' + getStatusClass(request.requestStatus)">
               {{ request.requestStatus }}
             </span>
-          </td>
-          <td class="justification">
-            <div class="justification-text" [title]="request.justification">
-              {{ request.justification }}
-            </div>
-          </td>
-          <td class="text-center">
-            <button
-              class="btn-view-details"
-              (click)="viewRequestDetails(request)"
-              title="View full details"
-            >
-              <i class="fas fa-eye"></i>
-            </button>
-          </td>
-        </tr>
+        </td>
+        <td class="justification">
+          <div class="justification-text" [title]="request.justification">
+            {{ request.justification }}
+          </div>
+        </td>
+        <td class="text-center">
+          <button
+            class="btn-view-details"
+            (click)="viewRequestDetails(request)"
+            title="View full details"
+          >
+            <i class="fas fa-eye"></i>
+          </button>
+        </td>
+      </tr>
       </tbody>
     </table>
   </div>
@@ -150,6 +148,7 @@
   <div *ngIf="!isLoading && requests.length > 0" class="summary-section">
     <p>Showing {{ filteredRequests.length }} of {{ requests.length }} request(s)</p>
   </div>
+
 </div>
 
 <!-- Modal for Request Details -->
@@ -162,11 +161,6 @@
 
     <div class="modal-body" *ngIf="selectedRequest">
       <div class="detail-grid">
-<!--        <div class="detail-item">-->
-<!--          <label>Request ID:</label>-->
-<!--          <span class="detail-value">{{ selectedRequest.requestId }}</span>-->
-<!--        </div>-->
-
         <div class="detail-item">
           <label>Event Name:</label>
           <span class="detail-value">{{ selectedRequest.eventName || 'EventNotCreated' }}</span>
@@ -203,8 +197,6 @@
           <label>TAN Number:</label>
           <span class="detail-value">{{ selectedRequest.tanNo || 'N/A' }}</span>
         </div>
-
-
 
         <div class="detail-item full-width">
           <label>Curriculum:</label>

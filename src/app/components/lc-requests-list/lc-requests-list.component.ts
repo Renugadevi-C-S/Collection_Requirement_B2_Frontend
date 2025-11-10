@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { RequestService } from '../../services/request.service';
 import { requestsViewDetails } from '../../model/requestsViewDetails';
@@ -39,7 +40,8 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
 
   constructor(
     private userService: UserService,
-    private requestService: RequestService
+    private requestService: RequestService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -83,13 +85,6 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
 
   applyFilters(): void {
     let filtered = [...this.requests];
-
-    // // Filter by Request ID
-    // if (this.filters.requestId) {
-    //   filtered = filtered.filter(req =>
-    //     req.requestId.toString().includes(this.filters.requestId)
-    //   );
-    // }
 
     // Filter by Event Name
     if (this.filters.eventName) {
@@ -187,6 +182,10 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
     this.loadRequests();
   }
 
+  navigateToNewRequest(): void {
+    this.router.navigate(['/lc-dashboard/submit-request']);
+  }
+
   // Modal methods
   viewRequestDetails(request: requestsViewDetails): void {
     this.selectedRequest = request;
@@ -199,4 +198,3 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
     this.selectedRequest = null;
   }
 }
-

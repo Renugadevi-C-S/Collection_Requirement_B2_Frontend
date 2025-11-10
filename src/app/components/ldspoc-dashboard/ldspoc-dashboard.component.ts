@@ -36,8 +36,6 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
     this.userSubscription = this.userService.loggedInUser.subscribe(user => {
       this.currentUser = user;
     });
-
-    this.loadStatistics();
   }
 
   ngOnDestroy(): void {
@@ -51,34 +49,5 @@ export class LdspocDashboardComponent implements OnInit, OnDestroy {
       return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
     }
     return 'User';
-  }
-
-  loadStatistics(): void {
-    this.isLoadingStats = true;
-
-    // Load request statistics
-    this.requestService.getRequestStatistics()
-      .pipe(
-        catchError(err => {
-          console.error('Error loading request statistics:', err);
-          return of(null);
-        })
-      )
-      .subscribe(stats => {
-        this.requestStats = stats;
-      });
-
-    // Load event statistics
-    this.eventService.getEventStatistics()
-      .pipe(
-        catchError(err => {
-          console.error('Error loading event statistics:', err);
-          return of(null);
-        })
-      )
-      .subscribe(stats => {
-        this.eventStats = stats;
-        this.isLoadingStats = false;
-      });
   }
 }
