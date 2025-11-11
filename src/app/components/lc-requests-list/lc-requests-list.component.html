@@ -140,7 +140,7 @@
 
   <!-- No Requests Message -->
   <div *ngIf="!isLoading && filteredRequests.length === 0 && !errorMessage" class="no-requests">
-    <p *ngIf="requests.length === 0">No requests found. Submit your first training request!</p>
+    <p *ngIf="requests.length === 0">No requests by you. Raise a request!</p>
     <p *ngIf="requests.length > 0">No requests match your filters.</p>
   </div>
 

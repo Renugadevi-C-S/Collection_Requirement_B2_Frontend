@@ -70,19 +70,36 @@ export class LcRequestsListComponent implements OnInit, OnDestroy {
       .pipe(
         catchError(err => {
           console.error('Error loading requests:', err);
-          this.errorMessage = 'Failed to load requests. Please try again.';
+          // Check if it's a "not found" type error (which is normal when no requests exist)
+          const errorMsg = err.error?.message || err.message || '';
+          const isNotFoundError = errorMsg.toLowerCase().includes('not found') || 
+                                  errorMsg.toLowerCase().includes('no request');
+          
+          if (!isNotFoundError) {
+            // Only show error for actual errors, not for "no requests found"
+            this.errorMessage = errorMsg || 'Failed to load requests. Please try again.';
+          }
           this.isLoading = false;
           return of([]);
         })
       )
       .subscribe((response: any) => {
+        this.isLoading = false;
         if(response.exception != null){
-          alert(response.message);
+          // Check if it's a "not found" type message
+          const isNotFoundError = response.message?.toLowerCase().includes('not found') || 
+                                  response.message?.toLowerCase().includes('no request');
+          
+          if (!isNotFoundError) {
+            // Only show error for actual errors, not for "no requests found"
+            this.errorMessage = response.message || 'An error occurred while loading requests.';
+          }
+          this.requests = [];
+          this.filteredRequests = [];
         }
         else {
           this.requests = response;
           this.filteredRequests = response;
-          this.isLoading = false;
           this.applyFilters();
         }
       });
