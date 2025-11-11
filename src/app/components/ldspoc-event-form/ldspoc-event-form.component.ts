@@ -156,7 +156,7 @@ export class LdspocEventFormComponent implements OnInit {
           }
           else{
             this.availableRequests = requests;
-            this.isLoadingRequests = false; 
+            this.isLoadingRequests = false;
           }
         }
       });
@@ -209,7 +209,7 @@ export class LdspocEventFormComponent implements OnInit {
     return this.eventForm.valid && this.hasSelectedRequests();
   }
 
-  //Submit handles both CREATE and EDIT
+  //Submit handles both CREATE & EDIT
   onSubmit(): void {
     if (this.eventForm.invalid) {
       this.markFormGroupTouched(this.eventForm);
