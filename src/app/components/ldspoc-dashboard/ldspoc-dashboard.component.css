@@ -1,0 +1,67 @@
+.ldspoc-dashboard-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: "Ford Antenna", Arial, sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+}
+
+.dashboard-header {
+  background-color: #ffffff;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-bottom: 3px solid var(--ford-blue, #1c3b6b);
+}
+
+.header-title h1 {
+  margin: 0;
+  font-size: 1.8em;
+  font-weight: 600;
+  color: var(--ford-blue, #1c3b6b);
+}
+
+.welcome-text {
+  margin: 5px 0 0 0;
+  font-size: 1em;
+  color: #666;
+  font-weight: 400;
+}
+
+.nav-bar {
+  background-color: var(--ford-blue, #1c3b6b);
+  padding: 15px 30px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-bar a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1.1em;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-right: 15px;
+}
+
+.nav-bar a:hover {
+  background-color: #004488;
+  color: #ffffff;
+}
+
+.nav-bar a.active {
+  background-color: #007bff;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+body {
+  margin: 0;
+}

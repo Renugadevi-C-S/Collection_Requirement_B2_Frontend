@@ -1,0 +1,396 @@
+<div class="events-list-container">
+  <div class="header-section">
+    <h2>Training Events</h2>
+    <div class="header-actions">
+      <button class="btn-new-event" (click)="navigateToCreateEvent()">
+        <span class="plus-icon">+</span> New Event
+      </button>
+      <button class="btn-reload" (click)="refreshEvents()" [disabled]="isLoading" title="Reload events">
+        <span class="reload-icon">🔄</span> Reload
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-alert">
+    <span>⚠️ {{ errorMessage }}</span>
+    <button (click)="refreshEvents()" class="btn-retry">Retry</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading events...</p>
+  </div>
+
+<!--  &lt;!&ndash; No Events Message &ndash;&gt;-->
+<!--  <div *ngIf="!isLoading && filteredEvents.length === 0 && !errorMessage" class="no-events">-->
+<!--    <p *ngIf="events.length === 0">No events found. Create your first training event!</p>-->
+<!--    <p *ngIf="events.length > 0">No events match your filters.</p>-->
+<!--  </div>-->
+
+  <!-- Events Table -->
+  <div *ngIf="!isLoading && events.length > 0" class="table-container">
+    <table class="events-table">
+      <thead>
+      <tr class="header-row">
+        <th>Event Name</th>
+        <th>Event Type</th>
+        <th>Duration (hrs)</th>
+        <th>Status</th>
+        <th>Created By</th>
+        <th>Actions</th>
+      </tr>
+      <tr class="filter-row">
+        <th>
+          <input
+            type="text"
+            [(ngModel)]="filters.eventName"
+            (input)="applyFilters()"
+            placeholder="Filter name"
+            class="column-filter"
+          />
+        </th>
+        <th>
+          <select
+            [(ngModel)]="filters.eventType"
+            (change)="applyFilters()"
+            class="column-filter-select"
+          >
+            <option value="">All Types</option>
+            <option value="Workshop">Workshop</option>
+            <option value="Seminar">Seminar</option>
+            <option value="Training">Training</option>
+            <option value="Conference">Conference</option>
+            <option value="Webinar">Webinar</option>
+            <option value="Certification">Certification</option>
+            <option value="Other">Other</option>
+          </select>
+        </th>
+        <th></th>
+        <th>
+          <select
+            [(ngModel)]="filters.status"
+            (change)="applyFilters()"
+            class="column-filter-select"
+          >
+            <option value="">All Status</option>
+            <option value="Planned">Planned</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Deleted">Deleted</option>
+          </select>
+        </th>
+        <th>
+          <input
+            type="text"
+            [(ngModel)]="filters.createdBy"
+            (input)="applyFilters()"
+            placeholder="Filter creator"
+            class="column-filter"
+          />
+        </th>
+        <th>
+          <button
+            (click)="clearFilters()"
+            class="btn-clear-filter"
+            title="Clear all filters"
+          >
+            <span class="clear-icon">🔄</span> Clear
+          </button>
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let event of filteredEvents" class="event-row">
+        <td class="event-name">{{ event.eventName }}</td>
+        <td>{{ event.eventType }}</td>
+        <td class="text-center">{{ event.duration }}</td>
+        <td>
+            <span [class]="'status-badge ' + getStatusClass(event.status)">
+              {{ event.status }}
+            </span>
+        </td>
+        <td>{{ event.createdBy }}</td>
+        <td class="action-buttons">
+          <button
+            class="btn-action btn-view"
+            (click)="viewEventDetails(event)"
+            title="View Details"
+          >
+            <i class="fas fa-eye"></i>
+          </button>
+
+          <button
+            *ngIf="shouldShowEditButton(event)"
+            class="btn-action btn-edit"
+            (click)="editEvent(event.eventId)"
+            [disabled]="isEditEventButtonDisabled(event)"
+            [title]="getEditEventButtonTitle(event)"
+          >
+            <i class="fas fa-edit"></i>
+          </button>
+
+          <!-- Complete Event Button - Hidden ONLY for Deleted/Completed, Disabled for Cancelled -->
+          <button
+            *ngIf="shouldShowCompleteButton(event)"
+            class="btn-action btn-accept"
+            (click)="onCompleteEvent(event)"
+            [disabled]="isCompleteButtonDisabled(event)"
+            [title]="event.status.toLowerCase() === 'completed' ? 'Already Completed' : (event.status.toLowerCase() === 'cancelled' ? 'Cannot complete cancelled event' : 'Complete Event')"
+          >
+            <i class="fas fa-check"></i>
+          </button>
+
+          <!-- Cancel Event Button - Hidden ONLY for Deleted/Cancelled, Disabled for Completed -->
+          <button
+            *ngIf="shouldShowCancelButton(event)"
+            class="btn-action btn-reject"
+            (click)="onCancelEvent(event)"
+            [disabled]="isCancelButtonDisabled(event)"
+            [title]="event.status.toLowerCase() === 'cancelled' ? 'Already Cancelled' : (event.status.toLowerCase() === 'completed' ? 'Cannot cancel completed event' : 'Cancel Event')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+
+          <!-- Delete button hidden when status is "Deleted" -->
+          <button
+            *ngIf="event.status.toLowerCase() !== 'deleted'"
+            class="btn-action btn-delete-grey"
+            (click)="deleteEvent(event.eventId)"
+            title="Delete Event"
+          >
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- No Events Message -->
+  <div *ngIf="!isLoading && filteredEvents.length === 0 && !errorMessage" class="no-events">
+    <p *ngIf="events.length === 0">No events found. Create your first training event!</p>
+    <p *ngIf="events.length > 0">No events match your filters.</p>
+  </div>
+
+  <!-- Summary -->
+  <div *ngIf="!isLoading && events.length > 0" class="summary-section">
+    <p>Showing {{ filteredEvents.length }} of {{ events.length }} event(s)</p>
+  </div>
+</div>
+
+<!-- Modal for Event Details  -->
+<div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content view-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Event Details</h2>
+      <button class="btn-close-modal" (click)="closeModal()" title="Close">✕</button>
+    </div>
+
+    <!-- Loading state while fetching details -->
+    <div *ngIf="isLoadingDetails" class="modal-body">
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading event details...</p>
+      </div>
+    </div>
+
+    <!-- Complete event details -->
+    <div class="modal-body" *ngIf="!isLoadingDetails && selectedEvent">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>Event Name:</label>
+          <span class="detail-value">{{ selectedEvent.eventName }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>Event Type:</label>
+          <span class="detail-value">{{ selectedEvent.eventType }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>Duration (hours):</label>
+          <span class="detail-value">{{ selectedEvent.duration }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>Event Created Date:</label>
+          <span class="detail-value">{{ selectedEvent.createdDate ? formatDate(selectedEvent.createdDate) : 'Not Set' }}</span>
+        </div>
+
+        <!-- Funding Source -->
+        <div class="detail-item">
+          <label>Funding Source:</label>
+          <span class="detail-value">{{ selectedEvent.fundingSource || 'N/A' }}</span>
+        </div>
+
+        <!-- Participants Count -->
+        <div class="detail-item">
+          <label>Total Participants:</label>
+          <span class="detail-value">{{ selectedEvent.participantsCount || 0 }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>Status:</label>
+          <span [class]="'status-badge ' + getStatusClass(selectedEvent.status)">
+            {{ selectedEvent.status }}
+          </span>
+        </div>
+
+        <div class="detail-item">
+          <label>Created By:</label>
+          <span class="detail-value">{{ selectedEvent.createdBy }}</span>
+        </div>
+
+        <!-- Description (full width) -->
+        <div class="detail-item full-width">
+          <label>Description:</label>
+          <div class="detail-value justification-full">{{ selectedEvent.description || 'N/A' }}</div>
+        </div>
+
+        <ng-container *ngIf="selectedEvent.status?.toLowerCase() === 'completed'">
+          <div class="detail-item">
+            <label>Completed By:</label>
+            <span class="detail-value">{{ selectedEvent.completedBy || 'N/A' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label>Completed Date:</label>
+            <span class="detail-value">{{ selectedEvent.completedDate ? formatDate(selectedEvent.completedDate) : 'N/A' }}</span>
+          </div>
+
+          <div class="detail-item full-width">
+            <label>Completion Notes:</label>
+            <div class="detail-value justification-full">{{ selectedEvent.completionNotes || 'N/A' }}</div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="selectedEvent.status?.toLowerCase() === 'cancelled'">
+          <div class="detail-item">
+            <label>Cancelled By:</label>
+            <span class="detail-value">{{ selectedEvent.cancelledBy || 'N/A' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label>Cancelled Date:</label>
+            <span class="detail-value">{{ selectedEvent.cancelledDate ? formatDate(selectedEvent.cancelledDate) : 'N/A' }}</span>
+          </div>
+
+          <div class="detail-item full-width">
+            <label>Cancellation Notes:</label>
+            <div class="detail-value justification-full">{{ selectedEvent.cancellationNotes || 'N/A' }}</div>
+          </div>
+        </ng-container>
+      </div>
+
+      <div *ngIf="selectedEvent.linkedRequests && selectedEvent.linkedRequests.length > 0" class="linked-requests-section">
+        <h3 class="section-title">Linked Requests ({{ selectedEvent.linkedRequests.length }})</h3>
+
+        <div class="requests-table-container">
+          <table class="linked-requests-table">
+            <thead>
+            <tr>
+              <th>Department</th>
+              <th>Justification</th>
+              <th>Participants</th>
+              <th>TAN Number</th>
+              <th>Status</th>
+              <th>Requested By</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let request of selectedEvent.linkedRequests">
+              <td>{{ request.department }}</td>
+              <td class="justification">
+                <div class="justification-text" [title]="request.justification">
+                  {{ request.justification }}
+                </div>
+              </td>
+              <td class="text-center">{{ request.noOfParticipants }}</td>
+              <td>{{ request.tanNo || 'N/A' }}</td>
+              <td>
+                <span [class]="'status-badge ' + getStatusClass(request.requestStatus)">
+                    {{ request.requestStatus }}
+                  </span>
+              </td>
+              <td>{{ request.requestedBy }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- No linked requests message for cancelled events -->
+      <div *ngIf="!selectedEvent.linkedRequests || selectedEvent.linkedRequests.length === 0" class="no-linked-requests">
+        <p *ngIf="selectedEvent.status?.toLowerCase() === 'cancelled'">
+          ⚠️ This event was cancelled. All requests have been unlinked and their statuses changed back to "Approved".
+        </p>
+        <p *ngIf="selectedEvent.status?.toLowerCase() !== 'cancelled'">
+          No requests linked to this event.
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-close" (click)="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Complete/Cancel Event Modal -->
+<div *ngIf="showApprovalModal" class="modal-overlay" (click)="closeApprovalModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ isApprovalAction ? 'Complete Event' : 'Cancel Event' }}</h3>
+      <button class="btn-close" (click)="closeApprovalModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Event Name: <strong>{{ selectedEventForApproval?.eventName }}</strong></p>
+      <p>Created By: <strong>{{ selectedEventForApproval?.createdBy }}</strong></p>
+
+      <p *ngIf="isApprovalAction" style="color: #dc3545; font-weight: 600; margin-top: 15px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+        ⚠️ After completion, this event CANNOT be cancelled
+      </p>
+
+      <p *ngIf="!isApprovalAction" style="color: #dc3545; font-weight: 600; margin-top: 15px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+        ⚠️ After cancellation, this event CANNOT be completed
+      </p>
+
+      <div class="form-group">
+        <label for="approvalNotes">
+          {{ isApprovalAction ? 'Completion' : 'Cancellation' }} Notes <span class="required">*</span>
+        </label>
+        <textarea
+          id="approvalNotes"
+          [(ngModel)]="approvalNotes"
+          rows="4"
+          placeholder="Enter notes for this {{ isApprovalAction ? 'completion' : 'cancellation' }}"
+          class="form-control"
+          [class.is-invalid]="showNotesError"
+        ></textarea>
+        <small class="error-message" *ngIf="showNotesError">
+          Notes are required (minimum 10 characters)
+        </small>
+      </div>
+
+      <div *ngIf="submissionError" class="error-alert">
+        <span>⚠️ {{ submissionError }}</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeApprovalModal()" [disabled]="isSubmittingApproval">
+        Cancel
+      </button>
+      <button
+        [class]="isApprovalAction ? 'btn-primary' : 'btn-danger'"
+        (click)="submitEventApproval()"
+        [disabled]="isSubmittingApproval"
+      >
+        <span *ngIf="!isSubmittingApproval">{{ isApprovalAction ? 'Complete' : 'Cancel Event' }}</span>
+        <span *ngIf="isSubmittingApproval">Processing...</span>
+      </button>
+    </div>
+  </div>
+</div>

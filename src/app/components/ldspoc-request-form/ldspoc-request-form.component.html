@@ -1,0 +1,270 @@
+<div class="request-form-container">
+  <h2>{{ isEditMode ? 'Edit Training Request' : 'Submit Training Request' }}</h2>
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading request data...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-alert">
+    <span>⚠️ {{ errorMessage }}</span>
+  </div>
+
+  <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" class="request-form">
+
+    <div class="form-group">
+      <label for="requestorId">Requestor CDS ID</label>
+      <input
+        type="text"
+        id="requestorId"
+        [value]="getDisplayRequestorId()"
+        readonly
+        class="form-control readonly-field"
+      />
+      <small class="form-text">
+        {{ isEditMode ? 'Original requestor (cannot be changed)' : 'This field is auto-filled and cannot be edited' }}
+      </small>
+    </div>
+
+
+    <div class="form-group">
+      <label for="justification">Justification <span class="required">*</span></label>
+      <textarea
+        id="justification"
+        formControlName="justification"
+        rows="4"
+        placeholder="Enter the justification for this training request"
+        class="form-control"
+        [class.is-invalid]="isFieldInvalid('justification')"
+      ></textarea>
+      <small class="error-message" *ngIf="isFieldInvalid('justification')">
+        {{ getErrorMessage('justification') }}
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label for="tanNo">TAN Number</label>
+      <input
+        type="text"
+        id="tanNo"
+        formControlName="tanNo"
+        placeholder="e.g., TAN-12345"
+        class="form-control"
+        [class.is-invalid]="isFieldInvalid('tanNo')"
+      />
+      <small class="error-message" *ngIf="isFieldInvalid('tanNo')">
+        {{ getErrorMessage('tanNo') }}
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label for="noOfParticipants">Number of Participants <span class="required">*</span></label>
+      <input
+        type="number"
+        id="noOfParticipants"
+        formControlName="noOfParticipants"
+        placeholder="Enter number of participants"
+        min="1"
+        class="form-control"
+        [class.is-invalid]="isFieldInvalid('noOfParticipants')"
+      />
+      <small class="error-message" *ngIf="isFieldInvalid('noOfParticipants')">
+        {{ getErrorMessage('noOfParticipants') }}
+      </small>
+    </div>
+
+    <!-- Participants Section -->
+    <div class="form-group">
+      <label>Add Participants <span class="required">*</span></label>
+
+      <!-- Search Input -->
+      <div class="participant-search-wrapper">
+        <div class="search-input-container">
+          <i class="fa-solid fa-magnifying-glass search-icon-prefix"></i>
+          <input
+            type="text"
+            [formControl]="searchControl"
+            placeholder="Search by name or CDSID..."
+            class="form-control search-input"
+            (focus)="onSearchFocus()"
+            (blur)="onSearchBlur()"
+            autocomplete="off"
+          />
+          <span class="search-hint" *ngIf="!searchControl.value">Start typing to search users</span>
+        </div>
+
+        <!-- User Dropdown -->
+        <div
+          class="user-dropdown"
+          *ngIf="showUserDropdown && getAvailableUsers().length > 0"
+          (mouseenter)="onDropdownMouseEnter()"
+          (mouseleave)="onDropdownMouseLeave()"
+        >
+          <div class="dropdown-header">
+            <i class="fa-solid fa-users header-dropdown-icon"></i>
+            <span class="available-count">{{ getAvailableUsers().length }} user(s) available</span>
+          </div>
+          <div
+            class="user-item"
+            *ngFor="let user of getAvailableUsers()"
+            (mousedown)="onUserSelect($event, user)"
+          >
+            <div class="user-main-info">
+              <div class="user-name-cdsid">
+                <span class="user-display-name">{{ user.firstName }} {{ user.lastName }}</span>
+                <span class="user-cdsid-badge">({{ user.cdsId }})</span>
+              </div>
+              <span class="user-email">
+                <i class="fa-solid fa-envelope email-icon"></i>
+                {{ user.email }}
+              </span>
+            </div>
+            <i class="fa-solid fa-circle-plus add-icon"></i>
+          </div>
+        </div>
+
+        <!-- No Results -->
+        <div
+          class="user-dropdown"
+          *ngIf="showUserDropdown && searchControl.value && getAvailableUsers().length === 0"
+          (mouseenter)="onDropdownMouseEnter()"
+        >
+          <div class="no-results">
+            <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
+            <p>No users found</p>
+            <small *ngIf="filteredUsers.length > 0 && getAvailableUsers().length === 0">
+              All matching users have already been added
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected Participants List -->
+      <div class="selected-participants" *ngIf="selectedParticipants.length > 0">
+        <div class="participant-header">
+          <div class="header-left">
+            <i class="fa-solid fa-users header-icon"></i>
+            <span class="header-title">Selected Participants</span>
+            <span class="participant-count-badge">{{ selectedParticipants.length }}</span>
+          </div>
+          <span
+            class="count-status"
+            [class.count-valid]="validateParticipantCount()"
+            [class.count-invalid]="!validateParticipantCount()"
+          >
+            <i class="fa-solid" [ngClass]="validateParticipantCount() ? 'fa-circle-check' : 'fa-circle-exclamation'"></i>
+            {{ getParticipantCountMessage() }}
+          </span>
+        </div>
+        <div class="participant-list">
+          <div class="participant-chip" *ngFor="let participant of selectedParticipants; let i = index">
+            <div class="participant-index">{{ i + 1 }}</div>
+            <div class="participant-details">
+              <span class="participant-name">
+                <i class="fa-solid fa-user participant-user-icon"></i>
+                {{ participant.firstName }} {{ participant.lastName }}
+                <span class="participant-cdsid-inline">({{ participant.cdsId }})</span>
+              </span>
+              <span class="participant-email">
+                <i class="fa-solid fa-envelope email-icon"></i>
+                {{ participant.email }}
+              </span>
+            </div>
+            <button
+              type="button"
+              class="remove-btn"
+              (mousedown)="removeParticipant($event, participant.cdsId)"
+              title="Remove {{ participant.firstName }} {{ participant.lastName }}"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="selectedParticipants.length === 0">
+        <i class="fa-solid fa-user-plus empty-icon"></i>
+        <p class="empty-text">No participants added yet</p>
+        <small class="empty-subtext">Use the search box above to find and add participants</small>
+      </div>
+
+      <small class="form-text">
+        <i class="fa-solid fa-circle-info"></i>
+        <strong>Tip:</strong> Search and select participants for this training request.
+        The count must match the number of participants specified above.
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label for="department">Department <span class="required">*</span></label>
+      <select
+        id="department"
+        formControlName="department"
+        class="form-control"
+        [class.is-invalid]="isFieldInvalid('department')"
+      >
+        <option value="" disabled selected>Select Department</option>
+        <option value="Engineering">Engineering</option>
+        <option value="IT">IT</option>
+        <option value="ET">ET</option>
+        <option value="HR">HR</option>
+        <option value="Finance">Finance</option>
+        <option value="Operations">Operations</option>
+        <option value="Sales">Sales</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Quality">Quality</option>
+        <option value="Manufacturing">Manufacturing</option>
+        <option value="R&D">R&D</option>
+        <option value="Other">Other</option>
+      </select>
+      <small class="error-message" *ngIf="isFieldInvalid('department')">
+        {{ getErrorMessage('department') }}
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label for="curriculum">Curriculum Document (PDF/Excel)</label>
+      <div class="file-input-wrapper">
+        <input
+          type="file"
+          id="curriculum"
+          (change)="onFileSelected($event)"
+          accept=".pdf,.xls,.xlsx"
+          class="file-input"
+        />
+        <label for="curriculum" class="file-label">
+          <span class="file-button">Choose File</span>
+          <span class="file-name">{{ selectedFileName }}</span>
+        </label>
+      </div>
+      <small class="form-text">Optional: Upload PDF or Excel file</small>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="isSubmitting || isLoading"
+      >
+        {{ isSubmitting ? 'Submitting...' : (isEditMode ? 'Update Request' : 'Submit Request') }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="onReset()"
+        [disabled]="isSubmitting || isLoading"
+      >
+        {{ isEditMode ? 'Reset to Original' : 'Reset' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="onCancel()"
+        [disabled]="isSubmitting || isLoading"
+      >
+        Cancel
+      </button>
+    </div>
+  </form>
+</div>

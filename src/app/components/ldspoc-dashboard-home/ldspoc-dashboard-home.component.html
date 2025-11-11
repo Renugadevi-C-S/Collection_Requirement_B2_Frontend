@@ -1,0 +1,119 @@
+<div class="dashboard-home-container">
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-alert">
+    <span>⚠️ {{ errorMessage }}</span>
+    <button (click)="refreshStatistics()" class="btn-retry">Retry</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoadingStats" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading statistics...</p>
+  </div>
+
+  <!-- Statistics Container -->
+  <div *ngIf="!isLoadingStats" class="statistics-container">
+
+    <!-- REQUESTS Section -->
+    <div class="statistics-section requests-section">
+      <div class="section-header">
+        <h2 class="section-title">REQUESTS</h2>
+      </div>
+
+      <div class="stats-grid">
+        <div class="total-card total-requests">
+          <div class="total-card-content">
+            <div class="card-label">Total Requests</div>
+            <div class="card-number">{{ requestStats?.total || 0 }}</div>
+          </div>
+        </div>
+
+        <div class="status-cards-container">
+          <div class="status-cards-row">
+            <div class="status-card status-submitted">
+              <div class="card-label">Submitted</div>
+              <div class="card-number">{{ requestStats?.submitted || 0 }}</div>
+            </div>
+
+            <div class="status-card status-approved">
+              <div class="card-label">Approved</div>
+              <div class="card-number">{{ requestStats?.approved || 0 }}</div>
+            </div>
+
+            <div class="status-card status-rejected">
+              <div class="card-label">Rejected</div>
+              <div class="card-number">{{ requestStats?.rejected || 0 }}</div>
+            </div>
+          </div>
+
+          <div class="status-cards-row">
+            <div class="status-card status-in-progress">
+              <div class="card-label">In-Progress</div>
+              <div class="card-number">{{ requestStats?.inProgress || 0 }}</div>
+            </div>
+
+            <div class="status-card status-completed">
+              <div class="card-label">Completed</div>
+              <div class="card-number">{{ requestStats?.completed || 0 }}</div>
+            </div>
+
+            <div class="status-card status-deleted">
+              <div class="card-label">Deleted</div>
+              <div class="card-number">{{ requestStats?.deleted || 0 }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENTS Section -->
+    <div class="statistics-section events-section">
+      <div class="section-header">
+        <h2 class="section-title">EVENTS</h2>
+      </div>
+
+      <div class="stats-grid">
+        <div class="total-card total-events">
+          <div class="total-card-content">
+            <div class="card-label">Total Events</div>
+            <div class="card-number">{{ eventStats?.total || 0 }}</div>
+          </div>
+        </div>
+
+        <div class="status-cards-container">
+          <div class="status-cards-row">
+            <div class="status-card status-planned">
+              <div class="card-label">Planned</div>
+              <div class="card-number">{{ eventStats?.planned || 0 }}</div>
+            </div>
+
+            <div class="status-card status-in-progress">
+              <div class="card-label">In Progress</div>
+              <div class="card-number">{{ eventStats?.inProgress || 0 }}</div>
+            </div>
+
+            <div class="status-card status-event-completed">
+              <div class="card-label">Completed</div>
+              <div class="card-number">{{ eventStats?.completed || 0 }}</div>
+            </div>
+          </div>
+
+          <div class="status-cards-row">
+            <div class="status-card status-cancelled">
+              <div class="card-label">Cancelled</div>
+              <div class="card-number">{{ eventStats?.cancelled || 0 }}</div>
+            </div>
+
+            <div class="status-card status-event-deleted">
+              <div class="card-label">Deleted</div>
+              <div class="card-number">{{ eventStats?.deleted || 0 }}</div>
+            </div>
+
+            <div class="status-card-placeholder"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,1 +1,31 @@
 /* You can add global styles to this file, and also import other style files */
+
+:root {
+  --ford-blue: #1c3b6b;
+  --ford-blue-light: #2d4f7f;
+  --ford-blue-dark: #162950;
+  --ford-hover: #004488;
+  --ford-success: #28a745;
+  --ford-warning: #ffc107;
+  --ford-danger: #dc3545;
+  --ford-info: #17a2b8;
+  --ford-light: #f8f9fa;
+  --ford-dark: #343a40;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Ford Antenna", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+

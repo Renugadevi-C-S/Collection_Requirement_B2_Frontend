@@ -1,5 +1,5 @@
 .app-header {
-  background-color: #003366;
+  background-color: var(--ford-blue, #203B6D);
   color: #ffffff;
   padding: 0 30px;
   height: 60px;
@@ -11,10 +11,35 @@
   box-sizing: border-box;
 }
 
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ford-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
 .header-title span {
   font-size: 1.5em;
   font-weight: 600;
   letter-spacing: 1px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-info {
+  font-size: 0.95em;
+  font-weight: 500;
+  color: #ffffff;
+  opacity: 0.95;
 }
 
 .logout-button {
@@ -31,5 +56,5 @@
 
 .logout-button:hover {
   background-color: #ffffff;
-  color: #003366;
+  color: var(--ford-blue, #1c3b6b);
 }

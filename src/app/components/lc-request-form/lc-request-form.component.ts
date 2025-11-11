@@ -1,11 +1,310 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
+import { UserService } from '../../services/user.service';
+import { RequestService } from '../../services/request.service';
+import { requestDetails } from '../../model/requestDetails';
+import { LoginResponse } from '../../model/logInResponse';
+import { BasicUserInfo } from '../../model/basicUserInfo';
+import { Subscription, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-lc-request-form',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './lc-request-form.component.html',
   styleUrl: './lc-request-form.component.css'
 })
-export class LcRequestFormComponent {
+export class LcRequestFormComponent implements OnInit, OnDestroy {
 
+  requestForm!: FormGroup;
+  currentUser: LoginResponse | null = null;
+  private userSubscription?: Subscription;
+  selectedFileName: string = 'No file selected';
+  isSubmitting: boolean = false;
+
+  // Participant management
+  allUsers: BasicUserInfo[] = [];
+  filteredUsers: BasicUserInfo[] = [];
+  selectedParticipants: BasicUserInfo[] = [];
+  searchControl = new FormControl('');
+  showUserDropdown: boolean = false;
+  private blurTimeout: any;
+
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private userService: UserService,
+    private requestService: RequestService
+  ) {}
+
+  ngOnInit(): void {
+    this.userSubscription = this.userService.loggedInUser.subscribe(user => {
+      this.currentUser = user;
+    });
+
+    this.requestForm = this.fb.group({
+      justification: ['', [Validators.required, Validators.minLength(10)]],
+      tanNo: ['', [Validators.pattern(/^[A-Z0-9-]+$/)]],
+      noOfParticipants: ['', [Validators.required, Validators.min(1), Validators.max(1000)]],
+      department: ['', Validators.required],
+      curriculum: [null]
+    });
+
+    // Load all users for participant selection
+    this.loadUsers();
+
+    // Setup search listener
+    this.searchControl.valueChanges.subscribe(searchTerm => {
+      this.filterUsers(searchTerm || '');
+      if (searchTerm && searchTerm.trim()) {
+        this.showUserDropdown = true;
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
+    if (this.blurTimeout) {
+      clearTimeout(this.blurTimeout);
+    }
+  }
+
+  loadUsers(): void {
+    this.userService.getAllUsersBasicInfo()
+      .pipe(
+        catchError(err => {
+          console.error('Error loading users:', err);
+          alert('Failed to load user list');
+          return of([]);
+        })
+      )
+      .subscribe((response: any) => {
+
+        if(response.exception != null)
+          alert(response.message);
+        else{
+          this.allUsers = response;
+          this.filteredUsers = response;
+          console.log('Loaded users:', response.length);
+        }
+      });
+  }
+
+  filterUsers(searchTerm: string): void {
+    if (!searchTerm.trim()) {
+      this.filteredUsers = this.allUsers;
+      return;
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    this.filteredUsers = this.allUsers.filter(user =>
+      user.firstName.toLowerCase().includes(term) ||
+      user.lastName.toLowerCase().includes(term) ||
+      user.cdsId.toLowerCase().includes(term) ||
+      user.email.toLowerCase().includes(term)
+    );
+  }
+
+  // Get available users (exclude already selected)
+  getAvailableUsers(): BasicUserInfo[] {
+    const selectedCdsIds = this.selectedParticipants.map(p => p.cdsId);
+    return this.filteredUsers.filter(user => !selectedCdsIds.includes(user.cdsId));
+  }
+
+  onSearchFocus(): void {
+    if (this.blurTimeout) {
+      clearTimeout(this.blurTimeout);
+    }
+    this.showUserDropdown = true;
+  }
+
+  onSearchBlur(): void {
+    // Delay closing to allow click events to fire
+    this.blurTimeout = setTimeout(() => {
+      this.showUserDropdown = false;
+    }, 300);
+  }
+
+  onDropdownMouseEnter(): void {
+    // Clear blur timeout when mouse enters dropdown
+    if (this.blurTimeout) {
+      clearTimeout(this.blurTimeout);
+    }
+  }
+
+  onDropdownMouseLeave(): void {
+    // Don't auto-close when mouse leaves
+  }
+
+  // Use mousedown event to add participant (fires before blur)
+  onUserSelect(event: MouseEvent, user: BasicUserInfo): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.addParticipant(user);
+  }
+
+  addParticipant(user: BasicUserInfo): void {
+    console.log('Adding participant:', user);
+
+    const isAlreadyAdded = this.selectedParticipants.some(p => p.cdsId === user.cdsId);
+
+    if (isAlreadyAdded) {
+      alert(`${user.firstName} ${user.lastName} (${user.cdsId}) is already added to participants`);
+      return;
+    }
+
+    this.selectedParticipants = [...this.selectedParticipants, user];
+    console.log('Selected participants:', this.selectedParticipants);
+
+    this.searchControl.setValue('', { emitEvent: false });
+    this.filteredUsers = this.allUsers;
+
+    this.showUserDropdown = true;
+
+  }
+
+  removeParticipant(event: MouseEvent, cdsId: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    console.log('Removing participant:', cdsId);
+    this.selectedParticipants = this.selectedParticipants.filter(p => p.cdsId !== cdsId);
+    console.log('Remaining participants:', this.selectedParticipants);
+  }
+
+  validateParticipantCount(): boolean {
+    const expectedCount = parseInt(this.requestForm.get('noOfParticipants')?.value);
+    const actualCount = this.selectedParticipants.length;
+
+    if (isNaN(expectedCount) || expectedCount <= 0) {
+      return true;
+    }
+
+    return expectedCount === actualCount;
+  }
+
+  getParticipantCountMessage(): string {
+    const expectedCount = parseInt(this.requestForm.get('noOfParticipants')?.value);
+    const actualCount = this.selectedParticipants.length;
+
+    if (isNaN(expectedCount) || expectedCount <= 0) {
+      return '';
+    }
+
+    if (actualCount < expectedCount) {
+      return `Please add ${expectedCount - actualCount} more participant(s) or decrease the count.`;
+    } else if (actualCount > expectedCount) {
+      return `Please remove ${actualCount - expectedCount} participant(s) or increase the count.`;
+    } else {
+      return 'Participant count matches ✓';
+    }
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFileName = file.name;
+      this.requestForm.patchValue({
+        curriculum: file
+      });
+    } else {
+      this.selectedFileName = 'No file selected';
+      this.requestForm.patchValue({
+        curriculum: null
+      });
+    }
+  }
+
+  onSubmit(): void {
+    if (!this.requestForm.valid) {
+      Object.keys(this.requestForm.controls).forEach(key => {
+        this.requestForm.controls[key].markAsTouched();
+      });
+      alert('Please fill in all required fields correctly.');
+      return;
+    }
+
+    if (!this.validateParticipantCount()) {
+      alert('Number of participants must match the number of selected users. ' + this.getParticipantCountMessage());
+      return;
+    }
+
+    if (this.selectedParticipants.length === 0) {
+      alert('Please add at least one participant to the request.');
+      return;
+    }
+
+    if (this.currentUser) {
+      this.isSubmitting = true;
+
+      const requestData: requestDetails = {
+        requestorId: this.currentUser.cdsId,
+        justification: this.requestForm.value.justification,
+        tanNo: this.requestForm.value.tanNo,
+        noOfParticipants: parseInt(this.requestForm.value.noOfParticipants),
+        department: this.requestForm.value.department,
+        curriculum: this.selectedFileName,
+        usersCdsId: this.selectedParticipants.map(p => p.cdsId)
+      };
+
+      console.log('Submitting request:', requestData);
+
+      this.requestService.submitRequest(requestData)
+        .pipe(
+          catchError(err => {
+            console.error('Request submission error:', err);
+            alert('Error submitting request: ' + (err.error?.message || err.message));
+            this.isSubmitting = false;
+            return of(null);
+          })
+        )
+        .subscribe((response: any | null) => {
+          this.isSubmitting = false;
+          if (response) {
+            if(response.exception != null)
+              alert(response.message)
+            else {
+              alert(response.message);
+              this.requestForm.reset();
+              this.selectedFileName = 'No file selected';
+              this.selectedParticipants = [];
+              this.searchControl.setValue('');
+              this.router.navigate(['/lc-dashboard']);
+            }
+          }
+        });
+    }
+  }
+
+  onReset(): void {
+    this.requestForm.reset();
+    this.selectedFileName = 'No file selected';
+    this.selectedParticipants = [];
+    this.searchControl.setValue('');
+  }
+
+  onBack(): void {
+    this.router.navigate(['/lc-dashboard']);
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.requestForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  getErrorMessage(fieldName: string): string {
+    const field = this.requestForm.get(fieldName);
+    if (field?.errors) {
+      if (field.errors['required']) return `${fieldName} is required`;
+      if (field.errors['minlength']) return `${fieldName} must be at least ${field.errors['minlength'].requiredLength} characters`;
+      if (field.errors['min']) return `Value must be at least ${field.errors['min'].min}`;
+      if (field.errors['max']) return `Value must not exceed ${field.errors['max'].max}`;
+      if (field.errors['pattern']) return `Invalid format for ${fieldName}`;
+    }
+    return '';
+  }
 }
