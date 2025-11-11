@@ -273,7 +273,7 @@ export class LcRequestFormComponent implements OnInit, OnDestroy {
               this.selectedFileName = 'No file selected';
               this.selectedParticipants = [];
               this.searchControl.setValue('');
-              this.router.navigate(['/lc-dashboard']);
+              this.router.navigate(['/lc-dashboard/requests-list']);
             }
           }
         });

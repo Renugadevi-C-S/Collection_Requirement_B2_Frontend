@@ -64,6 +64,14 @@
   100% { transform: rotate(360deg); }
 }
 
+/* No Requests */
+.no-requests {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  font-size: 1.1em;
+}
+
 /* Statistics Container */
 .statistics-container {
   padding: 10px 0;

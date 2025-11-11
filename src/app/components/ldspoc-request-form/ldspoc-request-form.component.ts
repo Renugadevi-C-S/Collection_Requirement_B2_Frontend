@@ -350,7 +350,7 @@ export class LdspocRequestFormComponent implements OnInit, OnDestroy {
           }
           else{
             alert('Request updated successfully!');
-            this.router.navigate(['/ldspoc-dashboard']);
+            this.router.navigate(['/ldspoc-dashboard/request-list']);
           }
         });
     } else {
@@ -386,7 +386,7 @@ export class LdspocRequestFormComponent implements OnInit, OnDestroy {
             this.selectedFileName = 'No file selected';
             this.selectedParticipants = [];
             this.searchControl.setValue('');
-            this.router.navigate(['/ldspoc-dashboard']);
+            this.router.navigate(['/ldspoc-dashboard/request-list']);
           }
         });
     }
