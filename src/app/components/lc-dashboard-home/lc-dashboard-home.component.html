@@ -12,8 +12,13 @@
     <p>Loading statistics...</p>
   </div>
 
+  <!-- No Requests Message -->
+  <div *ngIf="!isLoadingStats && requestStats?.total === 0 && !errorMessage" class="no-requests">
+    <p>No requests by you. Raise a request!</p>
+  </div>
+
   <!-- Statistics Container -->
-  <div *ngIf="!isLoadingStats" class="statistics-container">
+  <div *ngIf="!isLoadingStats && requestStats && requestStats.total > 0" class="statistics-container">
 
     <!-- REQUESTS Section -->
     <div class="statistics-section requests-section">
